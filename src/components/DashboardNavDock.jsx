@@ -1,0 +1,106 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+
+export default function DashboardNavDock({ activeTab = 'map', setActiveTab }) {
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => {
+    setIsDark(prev => !prev);
+  };
+
+  return (
+    <aside
+      className="fixed left-4 top-1/2 -translate-y-1/2 z-40 bg-[#121212]/95 backdrop-blur-md border border-[#262626] rounded-2xl py-3 px-2 flex flex-col items-center justify-center gap-3 shadow-xl shadow-black/40"
+      style={{ top: '48%' }}
+      aria-label="Dashboard Dock Navigation"
+    >
+      <nav aria-label="Main Navigation" className="flex flex-col items-center space-y-2">
+        {/* Tab 1: Dashboard / Map (ACTIVE) */}
+        <button
+          onClick={() => setActiveTab && setActiveTab('map')}
+          className={`group relative flex items-center justify-center w-10 h-10 rounded-xl transition-all cursor-pointer ${
+            activeTab === 'map'
+              ? 'bg-[#2a2a2a] text-white border border-[#353534] shadow-sm'
+              : 'text-[#a3a3a3] hover:text-white hover:bg-[#1c1b1b]'
+          }`}
+          title="Live Map Dashboard"
+        >
+          <span className="material-symbols-outlined text-[20px]">dashboard</span>
+          <span className="absolute left-14 px-2.5 py-1 rounded-lg bg-[#353534] text-white font-mono text-[0.6875rem] tracking-wide whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity border border-[#444748] shadow-lg z-50">
+            Live Map Dashboard
+          </span>
+        </button>
+
+        {/* Tab 2: IMD Alerts */}
+        <button
+          onClick={() => setActiveTab && setActiveTab('alerts')}
+          className={`group relative flex items-center justify-center w-10 h-10 rounded-xl transition-colors cursor-pointer ${
+            activeTab === 'alerts'
+              ? 'bg-[#2a2a2a] text-white border border-[#353534]'
+              : 'text-[#a3a3a3] hover:text-white hover:bg-[#1c1b1b]'
+          }`}
+          title="IMD Severe Alerts"
+        >
+          <span className="material-symbols-outlined text-[20px] text-[#f97316]">warning</span>
+          <span className="absolute left-14 px-2.5 py-1 rounded-lg bg-[#353534] text-white font-mono text-[0.6875rem] tracking-wide whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity border border-[#444748] shadow-lg z-50">
+            Active Alerts (2 Zones)
+          </span>
+        </button>
+
+        {/* Tab 3: Model Comparison */}
+        <button
+          onClick={() => setActiveTab && setActiveTab('comparison')}
+          className={`group relative flex items-center justify-center w-10 h-10 rounded-xl transition-colors cursor-pointer ${
+            activeTab === 'comparison'
+              ? 'bg-[#2a2a2a] text-white border border-[#353534]'
+              : 'text-[#a3a3a3] hover:text-white hover:bg-[#1c1b1b]'
+          }`}
+          title="Model Consensus & Comparison"
+        >
+          <span className="material-symbols-outlined text-[20px]">compare_arrows</span>
+          <span className="absolute left-14 px-2.5 py-1 rounded-lg bg-[#353534] text-white font-mono text-[0.6875rem] tracking-wide whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity border border-[#444748] shadow-lg z-50">
+            Model Analysis
+          </span>
+        </button>
+
+        {/* Tab 4: About / Return to Landing Page */}
+        <Link
+          to="/"
+          className="group relative flex items-center justify-center w-10 h-10 rounded-xl text-[#a3a3a3] hover:text-white hover:bg-[#1c1b1b] transition-colors"
+          title="Return to Overview"
+        >
+          <span className="material-symbols-outlined text-[20px]">home</span>
+          <span className="absolute left-14 px-2.5 py-1 rounded-lg bg-[#353534] text-white font-mono text-[0.6875rem] tracking-wide whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity border border-[#444748] shadow-lg z-50">
+            Platform Overview
+          </span>
+        </Link>
+      </nav>
+
+      {/* Divider */}
+      <div className="w-6 h-px bg-[#262626] my-0.5" />
+
+      {/* Theme Toggle Button */}
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className="group relative flex items-center justify-center w-10 h-10 rounded-xl text-[#a3a3a3] hover:text-white hover:bg-[#1c1b1b] transition-colors cursor-pointer"
+        title="Toggle Theme"
+      >
+        <span className="material-symbols-outlined text-[20px]">
+          {isDark ? 'dark_mode' : 'light_mode'}
+        </span>
+        <span className="absolute left-14 px-2.5 py-1 rounded-lg bg-[#353534] text-white font-mono text-[0.6875rem] tracking-wide whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity border border-[#444748] shadow-lg z-50">
+          {isDark ? 'Dark Theme Active' : 'Light Theme Active'}
+        </span>
+      </button>
+    </aside>
+  );
+}
