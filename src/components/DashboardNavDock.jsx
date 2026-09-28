@@ -1,21 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 export default function DashboardNavDock({ activeTab = 'map', setActiveTab }) {
-  const [isDark, setIsDark] = useState(true);
-
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDark]);
-
-  const toggleTheme = () => {
-    setIsDark(prev => !prev);
-  };
-
   return (
     <aside
       className="fixed left-4 top-1/2 -translate-y-1/2 z-40 bg-[#121212]/95 backdrop-blur-md border border-[#262626] rounded-2xl py-3 px-2 flex flex-col items-center justify-center gap-3 shadow-xl shadow-black/40"
@@ -83,24 +69,6 @@ export default function DashboardNavDock({ activeTab = 'map', setActiveTab }) {
           </span>
         </Link>
       </nav>
-
-      {/* Divider */}
-      <div className="w-6 h-px bg-[#262626] my-0.5" />
-
-      {/* Theme Toggle Button */}
-      <button
-        type="button"
-        onClick={toggleTheme}
-        className="group relative flex items-center justify-center w-10 h-10 rounded-xl text-[#a3a3a3] hover:text-white hover:bg-[#1c1b1b] transition-colors cursor-pointer"
-        title="Toggle Theme"
-      >
-        <span className="material-symbols-outlined text-[20px]">
-          {isDark ? 'dark_mode' : 'light_mode'}
-        </span>
-        <span className="absolute left-14 px-2.5 py-1 rounded-lg bg-[#353534] text-white font-mono text-[0.6875rem] tracking-wide whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity border border-[#444748] shadow-lg z-50">
-          {isDark ? 'Dark Theme Active' : 'Light Theme Active'}
-        </span>
-      </button>
     </aside>
   );
 }

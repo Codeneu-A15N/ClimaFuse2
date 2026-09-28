@@ -1,21 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 export default function SideNavDock() {
-  const [isDark, setIsDark] = useState(true);
-
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDark]);
-
-  const toggleTheme = () => {
-    setIsDark(prev => !prev);
-  };
-
   const navItems = [
     { label: 'Overview', icon: 'hub', href: '/' },
     { label: 'Dashboard', icon: 'dashboard', href: '/dashboard' },
@@ -76,25 +62,6 @@ export default function SideNavDock() {
           );
         })}
       </div>
-
-      {/* Divider */}
-      <div className="w-5 h-px bg-[#262626] my-1.5" />
-
-      {/* Theme Toggle Button */}
-      <button
-        type="button"
-        aria-label="Toggle Theme"
-        onClick={toggleTheme}
-        className="group relative flex items-center justify-center w-10 h-10 rounded-full text-[#a3a3a3] hover:text-white hover:bg-[#181818] transition-colors duration-150 cursor-pointer"
-        id="themeToggleBtn"
-      >
-        <span className="material-symbols-outlined text-[18px]" id="themeIcon">
-          {isDark ? 'dark_mode' : 'light_mode'}
-        </span>
-        <span className="absolute left-14 px-2.5 py-1 rounded bg-[#181818] border border-[#262626] text-[0.6875rem] font-mono text-[#e5e2e1] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl z-50">
-          Theme: {isDark ? 'Dark Mode' : 'Light Mode'}
-        </span>
-      </button>
     </aside>
   );
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import SideNavDock from '../components/SideNavDock';
+import { Link } from 'react-router-dom';
 import TopUtilityPill from '../components/TopUtilityPill';
 import MapComponent from '../components/MapComponent';
 import BentoGrid from '../components/BentoGrid';
@@ -7,14 +7,11 @@ import BentoGrid from '../components/BentoGrid';
 export default function LandingPage() {
   return (
     <div className="bg-[#0a0a0a] text-[#e5e2e1] antialiased selection:bg-[#222222] selection:text-white transition-colors duration-200 min-h-screen">
-      {/* FLOATING LEFT NAVBAR */}
-      <SideNavDock />
-
       {/* TOP RIGHT FLOATING UTILITY PILL */}
       <TopUtilityPill />
 
       {/* MAIN VIEWPORT CANVAS */}
-      <main className="pl-6 sm:pl-20 md:pl-28 lg:pl-32 pr-6 md:pr-12 w-full overflow-x-hidden">
+      <main className="px-6 md:px-12 lg:px-16 w-full overflow-x-hidden">
         {/* HERO SECTION */}
         <section className="pt-28 pb-20 max-w-7xl mx-auto border-b border-[#262626]/40" id="product">
           {/* Breadcrumb Capsule */}
@@ -37,13 +34,13 @@ export default function LandingPage() {
                 ClimaFuse seamlessly blends ECMWF physics-based numerical weather prediction (IFS) with deep neural weather models (AIFS) using real-time historical accuracy — dynamically adapting across monsoon regimes, coastal boundaries, and Himalayan topography.
               </p>
               <div className="flex flex-wrap items-center gap-4">
-                <a
+                <Link
+                  to="/dashboard"
                   className="px-6 py-2.5 rounded-full bg-white text-[#0a0a0a] font-sans text-[0.9375rem] font-semibold hover:bg-[#e2e2e2] transition-all duration-150 shadow-md flex items-center gap-2"
-                  href="#outputs"
                 >
                   <span>View Live Dashboard</span>
                   <span className="material-symbols-outlined text-base">arrow_outward</span>
-                </a>
+                </Link>
                 <a
                   className="px-5 py-2.5 rounded-full bg-[#181818] border border-[#262626] text-white font-sans text-[0.9375rem] hover:bg-[#222222] hover:border-[#8e9192] transition-all duration-150 flex items-center gap-1.5"
                   href="#how-it-works"
@@ -305,12 +302,12 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="flex items-center gap-4 relative z-10 shrink-0">
-              <a
+              <Link
                 className="px-6 py-3 rounded-full bg-white text-[#0a0a0a] font-sans text-[0.9375rem] font-semibold hover:bg-[#e2e2e2] transition-all cursor-pointer shadow-md"
-                href="#outputs"
+                to="/dashboard"
               >
                 Access Portal
-              </a>
+              </Link>
               <a
                 className="px-5 py-3 rounded-full bg-[#111111] border border-[#262626] text-white font-sans text-[0.9375rem] hover:bg-[#222222] transition-all cursor-pointer"
                 href="#product"
@@ -348,9 +345,9 @@ export default function LandingPage() {
               <a className="hover:text-white transition-colors" href="#outputs">
                 Documentation
               </a>
-              <a className="hover:text-white transition-colors" href="#outputs">
+              <Link className="hover:text-white transition-colors" to="/dashboard">
                 Dashboard
-              </a>
+              </Link>
             </nav>
           </div>
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-6 border-t border-[#262626]/30 font-mono text-[0.6875rem] text-[#8e9192]">

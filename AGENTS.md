@@ -65,7 +65,7 @@ Climafuse/
     2. **Station Telemetry Mode (`selectedCity !== null`)**: Renders [`StationTelemetryPanel.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/StationTelemetryPanel.jsx) with high-density AWS station readouts, barometric pressure, UV index, 24h diurnal meteogram strip, and AI consensus blend.
   - **Bidirectional Layer Synchronization**: `activeOverlay` is managed in [`DashboardPage.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/Pages/DashboardPage.jsx) and synchronized between [`MapComponent.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/MapComponent.jsx) (bottom HUD buttons) and [`NationalOverviewPanel.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/NationalOverviewPanel.jsx) (synoptic layer cards).
   - **Seamless Navigation**: Users can click any city card in the warning bulletins list or any marker on the map to inspect station telemetry, and click `← All-India Overview` or `onResetMap` in the top bar to return to the national overview.
-- **Theme Support**: Ensure components support dark/light modes cleanly using CSS variables or Tailwind dark mode utilities (`document.documentElement.classList.toggle('dark')`).
+- **Strict Austere Dark Mode Standard**: ClimaFuse is permanently locked to its austere technical dark aesthetic (`#0A0A0A`). Dark/light toggles and light-mode overrides have been eliminated across the landing page and dashboard workstation to preserve operational contrast.
 - **Smooth Anchors**: Maintain anchor navigation IDs: `#product`, `#how-it-works`, `#why-climafuse`, `#outputs`, `#coverage`.
 
 ---

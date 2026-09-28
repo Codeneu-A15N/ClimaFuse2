@@ -24,11 +24,12 @@ ClimaFuse is a high-precision, technical meteorological intelligence platform th
 - [x] MapLibre installed + CSS imported
 - [x] react-day-picker installed + CSS imported
 - [x] Landing page design generated & extracted from Stitch (`d7d14eb7a1e84dc6a999c091d9bf58ae`)
-- [x] Landing page implemented in [`src/Pages/LandingPage.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/Pages/LandingPage.jsx)
-- [x] Subcomponents extracted to `src/components/`:
-  - [`SideNavDock.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/SideNavDock.jsx): Floating navigation dock with section anchors and Dark/Light theme toggle
+- [x] Landing page implemented in [`src/Pages/LandingPage.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/Pages/LandingPage.jsx) with clean symmetrical viewport spacing (removed left vertical nav, balanced container layout)
+- [x] Updated all "View Live Dashboard" and "Access Portal" buttons to route directly to `/dashboard` via React Router `<Link>` (resolved previous in-page anchor scroll)
+- [x] Removed dark/light toggle feature entirely across application (removed from dashboard dock and CSS overrides; standardizing on austere technical dark theme)
+- [x] Subcomponents in `src/components/`:
   - [`TopUtilityPill.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/TopUtilityPill.jsx): Floating status badge with pulsing live indicator and dashboard quick-link
-  - [`IndiaTelemetryMap.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/IndiaTelemetryMap.jsx): Architectural vector map of India with radar sweep and IMD AWS station nodes
+  - [`MapComponent.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/MapComponent.jsx): Architectural physical relief map of India with radar sweep and IMD AWS station nodes
   - [`BentoGrid.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/BentoGrid.jsx): 5 operational capability cards with dynamic attribution bar and IMD alert tiers
 - [x] React Router v6.4+ Data APIs configured in [`src/App.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/App.jsx) (`createBrowserRouter`, `RouterProvider`)
 
