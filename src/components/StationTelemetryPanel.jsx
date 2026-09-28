@@ -7,14 +7,34 @@ import React from 'react';
  * Utilizes the full vertical space from the very top of the dashboard to the bottom,
  * providing comprehensive synoptic readouts, diurnal progression, and AI consensus blend.
  */
-export default function StationTelemetryPanel({ city }) {
+export default function StationTelemetryPanel({ city, onBack }) {
   if (!city) return null;
 
   return (
     <aside
-      className="w-full lg:w-[420px] h-full flex flex-col justify-between rounded-2xl bg-[#121212]/95 backdrop-blur-2xl border border-[#262626] p-5 shadow-2xl overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-[#262626]"
+      className="w-full lg:w-[420px] h-full flex flex-col justify-between rounded-2xl bg-[#121212]/95 backdrop-blur-2xl border border-[#262626] p-4 lg:p-5 shadow-2xl overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-[#262626]"
       aria-label="Station Telemetry Inspection"
     >
+      {/* 0. Return to National Overview Header */}
+      {onBack && (
+        <div className="flex items-center justify-between pb-2.5 border-b border-[#262626]/60">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#1a1a1a] hover:bg-[#252525] border border-[#333] hover:border-white/30 text-[#4edea3] hover:text-white font-mono text-[11px] transition-all cursor-pointer group shadow-sm"
+            title="Return to Subcontinental All-India Overview"
+          >
+            <span className="material-symbols-outlined text-[14px] group-hover:-translate-x-0.5 transition-transform">
+              arrow_back
+            </span>
+            <span>All-India Overview</span>
+          </button>
+          <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#8e9192]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#4edea3] animate-pulse" />
+            <span>STATION TELEMETRY</span>
+          </div>
+        </div>
+      )}
+
       {/* 1. Station Header & Geo Coordinates */}
       <div className="flex items-start justify-between pb-1 border-b border-[#262626]/40">
         <div>

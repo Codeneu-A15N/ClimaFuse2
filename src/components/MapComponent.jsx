@@ -132,6 +132,7 @@ export default function MapComponent({
   basemapId = 'physical',
   onBasemapChange,
   layerType = 'default',
+  onLayerChange,
   choroplethData = null,
   cities = getCities(),
 }) {
@@ -635,7 +636,10 @@ export default function MapComponent({
         ].map((ov) => (
           <button
             key={ov.id}
-            onClick={() => setCurrentOverlay(ov.id)}
+            onClick={() => {
+              setCurrentOverlay(ov.id);
+              if (onLayerChange) onLayerChange(ov.id);
+            }}
             className={`flex items-center space-x-1 px-2.5 py-1 rounded-full font-sans text-[11px] transition-all cursor-pointer ${
               currentOverlay === ov.id
                 ? 'bg-white text-[#0a0a0a] font-semibold shadow-sm'

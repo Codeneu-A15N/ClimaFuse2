@@ -3,10 +3,12 @@ import DashboardNavDock from '../components/DashboardNavDock';
 import DashboardTopBar from '../components/DashboardTopBar';
 import MapComponent from '../components/MapComponent';
 import StationTelemetryPanel from '../components/StationTelemetryPanel';
+import NationalOverviewPanel from '../components/NationalOverviewPanel';
 import { CITIES } from '../api/cities';
 
 export default function DashboardPage() {
-  const [selectedCity, setSelectedCity] = useState(CITIES[0]);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [activeOverlay, setActiveOverlay] = useState('temperature');
   const [activeTab, setActiveTab] = useState('map');
 
   return (
@@ -21,21 +23,35 @@ export default function DashboardPage() {
             {/* LEFT / CENTER COLUMN: TopBar + MapLibre GL India Map Container */}
             <div className="relative flex-1 h-full flex flex-col gap-2.5 min-h-0 min-w-0">
               {/* TOP NAVBAR (Takes required space above map only) */}
-              <DashboardTopBar onResetMap={() => setSelectedCity(CITIES[0])} />
+              <DashboardTopBar onResetMap={() => setSelectedCity(null)} />
 
               {/* MapComponent Instance */}
               <div className="relative flex-1 w-full min-h-0">
                 <MapComponent
                   selectedCity={selectedCity}
                   onCityClick={(city) => setSelectedCity(city)}
+                  layerType={activeOverlay}
+                  onLayerChange={(layer) => setActiveOverlay(layer)}
                   cities={CITIES}
                 />
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Station Telemetry Panel (Takes full upper vertical space available) */}
+            {/* RIGHT COLUMN: National Overview Panel (Default) or Station Telemetry Panel (When City Clicked) */}
             <div className="w-full lg:w-[420px] shrink-0 h-full flex flex-col min-h-0">
-              <StationTelemetryPanel city={selectedCity} />
+              {selectedCity ? (
+                <StationTelemetryPanel
+                  city={selectedCity}
+                  onBack={() => setSelectedCity(null)}
+                />
+              ) : (
+                <NationalOverviewPanel
+                  cities={CITIES}
+                  onSelectCity={(city) => setSelectedCity(city)}
+                  activeOverlay={activeOverlay}
+                  onOverlayChange={(layer) => setActiveOverlay(layer)}
+                />
+              )}
             </div>
           </>
         )}
