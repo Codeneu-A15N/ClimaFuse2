@@ -36,21 +36,26 @@ ClimaFuse is a high-precision, technical meteorological intelligence platform th
 - [x] Extract Dashboard design from Stitch (`0f29241ba77a493f8e6a04fd78de92e9`)
 - [x] India GeoJSON boundary placed at [`/public/india.geojson`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/public/india.geojson)
 - [x] Mock station API created at [`/src/api/cities.js`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/api/cities.js) with 10 fixed reference stations
+- [x] Atmospheric telemetry dataset created at [`/src/api/atmosphericData.js`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/api/atmosphericData.js) with 40+ observation points across India's microclimates
 - [x] MapLibre GL JS physical map component implemented in [`src/components/MapComponent.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/MapComponent.jsx):
   - Physical Relief Map (Image 2 style) using ESRI World Physical Map raster tiles (hypsometric elevation tints, Himalayas, Deccan Plateau, Western/Eastern Ghats, rivers) — ZERO API key required
-  - Multi-basemap switcher (Physical Relief, Topographic, Satellite Imagery, Dark Telemetry)
+  - Multi-basemap switcher (Physical Relief, Topographic, Satellite Imagery) — removed unauthenticated Carto dark tiles
   - Optional MapTiler vector topo integration (`VITE_MAPTILER_KEY` via `.env.example`)
   - Crisp India boundary vector overlay (`/india.geojson`)
+  - Native MapLibre `type: 'heatmap'` layers for Thermal (10°C–40°C), Precipitation (0–120+ mm), and Heat Index (20°C–48°C) with floating HUD gradient scale legends
   - Constrained bounds (`[[58.0, 4.0], [102.0, 39.0]]`) centered on India
   - 10 clickable custom city markers showing weather glyphs, temperature, and IMD severity pips (Green/Yellow/Orange/Red)
-  - Data-driven atmospheric layer toggle support (Thermal / Precipitation / Heat Index / Relief Only)
   - HUD telemetry badge with real-time cursor coordinates
+- [x] Streamlined [`DashboardTopBar.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/DashboardTopBar.jsx):
+  - Removed duplicate tab buttons (handled by vertical dock)
+  - Added interactive Date & Time dropdown calendar with `react-day-picker` and synoptic cycle selection (00:00, 06:00, 12:00, 18:00 UTC)
+  - Positioned above map column only, allowing [`StationTelemetryPanel.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/StationTelemetryPanel.jsx) to take the full upper vertical space available
 - [x] Replaced landing page map with dynamic `MapComponent variant="landing"`:
   - Preserved exact container sizing (`w-full aspect-[4/5] max-w-md mx-auto rounded-2xl`)
   - Retained radar wavefront scanline, live station beacons, and header/footer telemetry badges
-- [x] Resolved Vite Web Worker bundler issue via `optimizeDeps: { exclude: ['maplibre-gl'] }`
-- [x] Integrated MapComponent into [`src/Pages/DashboardPage.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/Pages/DashboardPage.jsx)
-- [x] Subcomponents: [`DashboardNavDock.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/DashboardNavDock.jsx), [`DashboardTopBar.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/DashboardTopBar.jsx), [`StationTelemetryPanel.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/StationTelemetryPanel.jsx)
+- [x] Corrected station coordinates in [`/src/api/cities.js`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/api/cities.js) (shifted Chennai, Mumbai, Kolkata inland onto landmass, resolving ocean placement)
+- [x] Fixed MapLibre `load` event lifecycle in [`src/components/MapComponent.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/MapComponent.jsx) to reliably render Thermal, Precipitation, and Heat Index heatmaps with glowing observation points and gradient scale legend
+- [x] Expanded [`StationTelemetryPanel.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/StationTelemetryPanel.jsx) with barometric pressure, UV index, generous spacing, and flush bottom CTA button to fully utilize vertical height without empty space
 - [x] Multi-tab views for Model Comparison, Active IMD Bulletins, and Synoptic Insights
 
 ### Phase 3: Model Comparison & Verification Analytics [UPCOMING]

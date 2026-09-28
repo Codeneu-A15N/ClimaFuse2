@@ -106,3 +106,51 @@ html:not(.dark) body {
   background-color: #fbfbfb;
   color: #1a1a1a;
 }
+
+/* react-day-picker dark theme overrides */
+.calendar-dark-theme .rdp {
+  --rdp-accent-color: #4edea3;
+  --rdp-background-color: #201f1f;
+  margin: 0;
+  color: #ffffff;
+}
+.calendar-dark-theme .rdp-month_caption {
+  font-family: var(--font-headline, sans-serif);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: #ffffff;
+}
+.calendar-dark-theme .rdp-button_previous,
+.calendar-dark-theme .rdp-button_next {
+  color: #8e9192;
+  border-radius: 0.5rem;
+}
+.calendar-dark-theme .rdp-button_previous:hover,
+.calendar-dark-theme .rdp-button_next:hover {
+  background-color: #252525;
+  color: #ffffff;
+}
+.calendar-dark-theme .rdp-weekday {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  color: #8e9192;
+  font-weight: 500;
+}
+.calendar-dark-theme .rdp-day {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  color: #e5e2e1;
+  border-radius: 0.5rem;
+}
+.calendar-dark-theme .rdp-day:hover:not([aria-selected="true"]) {
+  background-color: #262626;
+  color: #ffffff;
+}
+.calendar-dark-theme [aria-selected="true"] {
+  background-color: #4edea3 !important;
+  color: #0a0a0a !important;
+  font-weight: 700;
+}
+.calendar-dark-theme .rdp-day_today {
+  border: 1px solid #4edea3;
+}
