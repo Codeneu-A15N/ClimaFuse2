@@ -204,6 +204,19 @@ npm run build
 npm run preview
 ```
 
+### Vercel Deployment
+ClimaFuse is configured for 1-click deployment on [Vercel](https://vercel.com/):
+- **Framework Preset**: Vite
+- **Root Directory**: `./` (or `Climafuse` if importing the parent workspace)
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Routing Configuration**: Handled automatically via [`vercel.json`](./vercel.json) with client-side SPA rewrites (`/(.*) -> /index.html`) and edge cache headers for immutable assets.
+
+To deploy via Vercel CLI:
+```bash
+npx vercel
+```
+
 ---
 
 ## 7. Operational Routing Map
