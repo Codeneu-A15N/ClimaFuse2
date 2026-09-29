@@ -142,6 +142,8 @@ export default function MapComponent({
   const markersRef = useRef([]);
   const [currentBasemap, setCurrentBasemap] = useState(basemapId);
   const [currentOverlay, setCurrentOverlay] = useState(layerType);
+  const currentOverlayRef = useRef(layerType);
+  const popupRef = useRef(null);
   const [cursorCoords, setCursorCoords] = useState({ lat: '22.80', lng: '79.20' });
 
   const isLanding = variant === 'landing';
@@ -156,6 +158,7 @@ export default function MapComponent({
   // Keep local overlay in sync if prop changes
   useEffect(() => {
     setCurrentOverlay(layerType);
+    currentOverlayRef.current = layerType;
   }, [layerType]);
 
   // Helper to attach India boundary and atmospheric telemetry layers to current style
@@ -217,7 +220,7 @@ export default function MapComponent({
       console.warn('Atmospheric telemetry source notice:', error);
     }
 
-    // 3. Thermal Heatmap Layer
+    // 3. Thermal Heatmap Layer (Calibrated to Empirical Station Telemetry)
     if (!map.getLayer('thermal-heatmap')) {
       map.addLayer({
         id: 'thermal-heatmap',
@@ -231,45 +234,47 @@ export default function MapComponent({
             'interpolate',
             ['linear'],
             ['get', 'temp'],
-            10, 0.25,
-            20, 0.45,
-            28, 0.7,
-            36, 0.9,
-            44, 1.0,
+            10, 0.10, // Cool Sky Blue (Himalayas / Leh, 10-18°C)
+            18, 0.28, // Soft Teal / Aquamarine (18-23°C, Srinagar, Shimla)
+            23, 0.44, // Temperate Green (23-27°C, Bengaluru, Pune)
+            28, 0.64, // Golden Yellow (27-31°C, Gangetic Plains, Delhi, Lucknow)
+            32, 0.82, // Warm Amber / Soft Orange (32-35°C, Jaipur, Ahmedabad)
+            36, 1.00, // Crimson Red (Peak Hot Zones >36°C, Thar Desert, Jaisalmer)
           ],
           'heatmap-intensity': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 2.4,
-            5, 3.4,
-            7, 4.5,
+            3, 0.95,
+            5, 1.15,
+            7, 1.45,
           ],
           'heatmap-color': [
             'interpolate',
             ['linear'],
             ['heatmap-density'],
-            0, 'rgba(0, 0, 0, 0)',
-            0.04, 'rgba(59, 130, 246, 0.45)',  // Deep Blue (Cool)
-            0.2, 'rgba(16, 185, 129, 0.75)',   // Emerald (Mild)
-            0.45, 'rgba(251, 191, 36, 0.85)',  // Yellow (Warm)
-            0.7, 'rgba(249, 115, 22, 0.9)',    // Orange (Hot)
-            1.0, 'rgba(239, 68, 68, 0.96)',    // Crimson Red (Extreme Heat)
+            0.0, 'rgba(0, 0, 0, 0)',
+            0.10, 'rgba(56, 189, 248, 0.50)',  // Cool Sky Blue (10-18°C)
+            0.28, 'rgba(45, 212, 191, 0.65)',  // Soft Teal / Aquamarine (18-23°C)
+            0.44, 'rgba(74, 222, 128, 0.75)',  // Temperate Green (23-27°C)
+            0.64, 'rgba(250, 204, 21, 0.82)',  // Golden Yellow (27-31°C)
+            0.82, 'rgba(251, 146, 60, 0.88)',  // Warm Amber / Soft Orange (31-34°C)
+            1.00, 'rgba(239, 68, 68, 0.95)',   // Crimson Red (Peak Hot Zones >35°C)
           ],
           'heatmap-radius': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 85,
-            5, 140,
-            7, 220,
+            3, 56,
+            5, 90,
+            7, 150,
           ],
-          'heatmap-opacity': 0.88,
+          'heatmap-opacity': 0.78,
         },
       });
     }
 
-    // 4. Precipitation Heatmap Layer
+    // 4. Precipitation Heatmap Layer (Accurate Rainfall Distribution)
     if (!map.getLayer('precipitation-heatmap')) {
       map.addLayer({
         id: 'precipitation-heatmap',
@@ -283,44 +288,47 @@ export default function MapComponent({
             'interpolate',
             ['linear'],
             ['get', 'precipitation'],
-            0, 0.05,
-            10, 0.3,
-            35, 0.65,
-            80, 0.9,
-            140, 1.0,
+            0, 0.0,
+            5, 0.12,
+            20, 0.32,
+            50, 0.60,
+            90, 0.82,
+            150, 1.0,
           ],
           'heatmap-intensity': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 2.4,
-            5, 3.4,
-            7, 4.5,
+            3, 0.95,
+            5, 1.15,
+            7, 1.45,
           ],
           'heatmap-color': [
             'interpolate',
             ['linear'],
             ['heatmap-density'],
-            0, 'rgba(0, 0, 0, 0)',
-            0.04, 'rgba(56, 189, 248, 0.45)', // Sky blue (Light rain)
-            0.25, 'rgba(2, 132, 199, 0.8)',   // Ocean blue (Moderate rain)
-            0.6, 'rgba(29, 78, 216, 0.88)',   // Deep blue (Heavy rain)
-            1.0, 'rgba(79, 70, 229, 0.96)',   // Indigo / Storm purple (Intense)
+            0.0, 'rgba(0, 0, 0, 0)',
+            0.10, 'rgba(186, 230, 253, 0.38)', // Trace mist / light drizzle (0-5 mm)
+            0.30, 'rgba(56, 189, 248, 0.62)',  // Light blue (5-20 mm)
+            0.55, 'rgba(14, 165, 233, 0.78)',  // Ocean blue (20-50 mm)
+            0.75, 'rgba(37, 99, 235, 0.88)',   // Deep blue (50-90 mm)
+            0.90, 'rgba(79, 70, 229, 0.95)',   // Indigo / Storm peak (90-140 mm, Konkan)
+            1.00, 'rgba(168, 85, 247, 0.98)',  // Intense Monsoon Purple (140+ mm, Cherrapunji)
           ],
           'heatmap-radius': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 80,
-            5, 135,
-            7, 210,
+            3, 52,
+            5, 85,
+            7, 140,
           ],
-          'heatmap-opacity': 0.88,
+          'heatmap-opacity': 0.78,
         },
       });
     }
 
-    // 5. Heat Index Heatmap Layer
+    // 5. Heat Index Heatmap Layer (Biometeorological Stress)
     if (!map.getLayer('heat-index-heatmap')) {
       map.addLayer({
         id: 'heat-index-heatmap',
@@ -334,44 +342,46 @@ export default function MapComponent({
             'interpolate',
             ['linear'],
             ['get', 'heatIndex'],
-            15, 0.2,
-            26, 0.45,
-            35, 0.75,
+            12, 0.05,
+            22, 0.20,
+            28, 0.42,
+            34, 0.68,
+            39, 0.88,
             44, 1.0,
           ],
           'heatmap-intensity': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 2.4,
-            5, 3.4,
-            7, 4.5,
+            3, 0.95,
+            5, 1.15,
+            7, 1.45,
           ],
           'heatmap-color': [
             'interpolate',
             ['linear'],
             ['heatmap-density'],
-            0, 'rgba(0, 0, 0, 0)',
-            0.04, 'rgba(16, 185, 129, 0.45)',  // Emerald (Safe / Normal)
-            0.22, 'rgba(251, 191, 36, 0.8)',   // Yellow (Caution)
-            0.5, 'rgba(249, 115, 22, 0.88)',   // Orange (Extreme Caution)
-            0.78, 'rgba(239, 68, 68, 0.92)',   // Crimson Red (Danger)
-            1.0, 'rgba(168, 85, 247, 0.98)',   // Violet / Purple (Extreme Danger)
+            0.0, 'rgba(0, 0, 0, 0)',
+            0.12, 'rgba(52, 211, 153, 0.42)', // Mint Emerald (Safe / Comfortable, <24°C, Bengaluru)
+            0.38, 'rgba(250, 204, 21, 0.70)', // Golden Yellow (Caution, 25-32°C, Delhi)
+            0.64, 'rgba(251, 146, 60, 0.84)', // Amber Orange (Extreme Caution, 33-37°C, Jaisalmer)
+            0.85, 'rgba(239, 68, 68, 0.92)',  // Coral Crimson (Danger, 38-42°C, Mumbai/Chennai)
+            1.00, 'rgba(168, 85, 247, 0.98)', // Purple Violet (Extreme Danger, >43°C)
           ],
           'heatmap-radius': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 85,
-            5, 140,
-            7, 220,
+            3, 56,
+            5, 90,
+            7, 150,
           ],
-          'heatmap-opacity': 0.88,
+          'heatmap-opacity': 0.78,
         },
       });
     }
 
-    // 6. Observation Station Data Points (Illuminated Nodes)
+    // 6. Observation Station Data Points (Data-Driven Illuminated Nodes)
     if (!map.getLayer('atmospheric-points')) {
       map.addLayer({
         id: 'atmospheric-points',
@@ -385,18 +395,24 @@ export default function MapComponent({
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 4,
-            6, 7,
+            3, 3.2,
+            5, 4.5,
+            7, 6.5,
           ],
           'circle-color': [
-            'case',
-            ['==', ['literal', currentOverlay], 'rainfall'], '#38bdf8',
-            ['==', ['literal', currentOverlay], 'heatmap'], '#f97316',
-            '#4edea3',
+            'interpolate',
+            ['linear'],
+            ['get', 'temp'],
+            10, '#38bdf8',
+            18, '#2dd4bf',
+            23, '#4ade80',
+            28, '#facc15',
+            32, '#fb923c',
+            35, '#ef4444',
           ],
           'circle-stroke-width': 1.5,
-          'circle-stroke-color': '#000000',
-          'circle-opacity': 0.9,
+          'circle-stroke-color': '#0a0a0a',
+          'circle-opacity': 0.95,
         },
       });
     }
@@ -463,6 +479,59 @@ export default function MapComponent({
       });
     });
 
+    // Interactive telemetry tooltip on observation points
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      offset: 8,
+      className: 'meteorological-hud-popup',
+    });
+    popupRef.current = popup;
+
+    map.on('mouseenter', 'atmospheric-points', (e) => {
+      if (!e.features || !e.features.length) return;
+      map.getCanvas().style.cursor = 'pointer';
+      const feature = e.features[0];
+      const coords = feature.geometry.coordinates.slice();
+      const props = feature.properties;
+      const activeL = currentOverlayRef.current;
+
+      let valText = `${props.temp}°C`;
+      let valLabel = 'Thermal (2m T)';
+      let badgeColor = '#4edea3';
+
+      if (activeL === 'rainfall') {
+        valText = `${props.precipitation} mm`;
+        valLabel = '24h Precipitation';
+        badgeColor = props.precipitation > 80 ? '#a855f7' : props.precipitation > 40 ? '#38bdf8' : '#94a3b8';
+      } else if (activeL === 'heatmap') {
+        valText = `${props.heatIndex}°C HI`;
+        valLabel = 'Heat Index Stress';
+        badgeColor = props.heatIndex > 38 ? '#ef4444' : props.heatIndex > 32 ? '#fbbf24' : '#4edea3';
+      } else {
+        badgeColor = props.temp >= 35 ? '#ef4444' : props.temp >= 31 ? '#fb923c' : props.temp >= 27 ? '#facc15' : props.temp >= 22 ? '#4ade80' : '#38bdf8';
+      }
+
+      popup
+        .setLngLat(coords)
+        .setHTML(`
+          <div style="background: rgba(14, 14, 14, 0.95); border: 1px solid #333; padding: 7px 11px; border-radius: 9px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.85); backdrop-filter: blur(8px); min-width: 140px;">
+            <div style="font-weight: 700; color: #fff; font-size: 12px; margin-bottom: 1px;">${props.name}</div>
+            <div style="font-size: 9.5px; color: #8e9192; margin-bottom: 5px;">${props.region}</div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid #262626; padding-top: 4px;">
+              <span style="font-size: 10px; color: #a3a3a3;">${valLabel}</span>
+              <span style="font-weight: 700; color: ${badgeColor}; font-size: 12px;">${valText}</span>
+            </div>
+          </div>
+        `)
+        .addTo(map);
+    });
+
+    map.on('mouseleave', 'atmospheric-points', () => {
+      map.getCanvas().style.cursor = '';
+      popup.remove();
+    });
+
     // ResizeObserver ensures container resizing recalculates map canvas cleanly
     const resizeObserver = new ResizeObserver(() => {
       if (mapRef.current) {
@@ -474,6 +543,7 @@ export default function MapComponent({
     }
 
     return () => {
+      popup.remove();
       resizeObserver.disconnect();
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
@@ -800,9 +870,42 @@ function applyMeteorologicalLayer(map, layerType) {
   }
   if (pointsLayer) {
     map.setLayoutProperty('atmospheric-points', 'visibility', layerType !== 'default' ? 'visible' : 'none');
-    if (layerType !== 'default') {
-      const dotColor = layerType === 'rainfall' ? '#38bdf8' : layerType === 'heatmap' ? '#f97316' : '#4edea3';
-      map.setPaintProperty('atmospheric-points', 'circle-color', dotColor);
+    if (layerType === 'temperature') {
+      map.setPaintProperty('atmospheric-points', 'circle-color', [
+        'interpolate',
+        ['linear'],
+        ['get', 'temp'],
+        10, '#38bdf8', // 10°C Cool Sky Blue (Leh, Himalayas)
+        18, '#2dd4bf', // 18°C Soft Teal (Srinagar, Shimla)
+        23, '#4ade80', // 23°C Temperate Green (Bengaluru, Pune)
+        28, '#facc15', // 28°C Golden Yellow (Delhi, Lucknow, Kolkata)
+        32, '#fb923c', // 32°C Amber Orange (Jaipur, Mumbai)
+        35, '#ef4444', // 35°C+ Crimson Red (Ahmedabad, Jaisalmer)
+      ]);
+    } else if (layerType === 'rainfall') {
+      map.setPaintProperty('atmospheric-points', 'circle-color', [
+        'interpolate',
+        ['linear'],
+        ['get', 'precipitation'],
+        0, '#64748b',   // Dry (0 mm)
+        5, '#38bdf8',   // Light drizzle (5 mm)
+        20, '#0284c7',  // Ocean blue (20 mm)
+        50, '#1d4ed8',  // Deep blue (50 mm)
+        90, '#6366f1',  // Indigo / Storm (90 mm, Konkan)
+        140, '#a855f7', // Intense Purple (140+ mm, Cherrapunji)
+      ]);
+    } else if (layerType === 'heatmap') {
+      map.setPaintProperty('atmospheric-points', 'circle-color', [
+        'interpolate',
+        ['linear'],
+        ['get', 'heatIndex'],
+        15, '#38bdf8', // Safe Cool Blue (<18°C)
+        24, '#4ade80', // Normal Safe Green (18-26°C, Bengaluru)
+        31, '#facc15', // Caution Yellow (27-32°C, Delhi)
+        36, '#fb923c', // Extreme Caution Orange (33-37°C, Jaisalmer)
+        40, '#ef4444', // Danger Crimson Red (38-42°C, Mumbai, Coastal)
+        45, '#a855f7', // Extreme Danger Purple (>43°C)
+      ]);
     }
   }
 

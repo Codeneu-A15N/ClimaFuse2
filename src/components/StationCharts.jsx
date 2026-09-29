@@ -75,6 +75,7 @@ export default function StationCharts({ station }) {
         <div className="p-4 sm:p-6 space-y-4">
           <div
             className="relative w-full h-72 sm:h-80 select-none cursor-crosshair"
+            style={{ minHeight: '288px', height: '288px' }}
             onMouseLeave={() => setActiveTempIndex(null)}
           >
             <svg
@@ -338,6 +339,7 @@ export default function StationCharts({ station }) {
         <div className="p-4 sm:p-6 space-y-4">
           <div
             className="relative w-full h-64 select-none cursor-crosshair"
+            style={{ minHeight: '256px', height: '256px' }}
             onMouseLeave={() => setActiveHeatIndex(null)}
           >
             <svg
@@ -524,6 +526,7 @@ export default function StationCharts({ station }) {
         <div className="p-4 sm:p-6 space-y-4">
           <div
             className="relative w-full h-44 sm:h-48 select-none"
+            style={{ minHeight: '176px', height: '176px' }}
             onMouseLeave={() => setActiveRainIndex(null)}
           >
             <svg
