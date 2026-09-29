@@ -77,6 +77,22 @@ Climafuse/
     4. **Dominant Attribution & Terrain Physics Rationale**: Scientific mechanism and dominant weight scale bar.
     5. **Inspectable Full Matrix Modal**: Popover drawer to view the complete 12-region attribution matrix and lead-time CRPS benchmarks.
   - Supports 3 weight regimes: **Thermal Weights**, **Precipitation Weights**, and **Heat Index Weights**, combined with 3 basemaps (Physical Relief, Topographic, Satellite) and 4 model focus modes (Consensus Blend, ECMWF IFS, ECMWF AIFS, NCMRWF).
+- **Full Station Analysis & Radiosonde Architecture**:
+  - Located at `/station/:cityId` (e.g. `/station/delhi`, `/station/mumbai`) and handled by [`src/Pages/StationAnalysisPage.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/Pages/StationAnalysisPage.jsx).
+  - Linked directly from the bottom CTA button in [`StationTelemetryPanel.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/StationTelemetryPanel.jsx) (`View Full Station Analytics & Radiosonde`).
+  - Supports all 10 IMD reference stations with dynamic data loaded via [`src/api/stationAnalysisData.js`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/api/stationAnalysisData.js).
+  - Includes:
+    1. **Top Bar & City Dropdown**: Quick-switch dropdown menu to jump between any of the 10 stations without returning to the map.
+    2. **Station Summary Banner**: WMO ID, coordinates, elevation ASL, BMA blend, current condition preview, and timeseries horizon switcher.
+    3. **5-Parameter Grid**: Surface air temp, apparent heat index, accumulated rain, wind vector, and relative humidity.
+    4. **3 High-Fidelity SVG Charts**:
+       - 2m Temperature with 90% BMA confidence interval polygon, NWP IFS, AI AIFS, ClimaFuse BMA, and IMD Observed nodes with interactive cursor crosshairs and tooltips.
+       - Heat Index & Biometeorological Stress curve with 35.0°C danger zone shading and threshold lines.
+       - Hourly Precipitation & Hyetograph paired bar comparison.
+    5. **Radiosonde Sounding Profile**: Vertical isobaric levels (1000 hPa to 200 hPa), freezing level, CAPE, and Lifted Index.
+    6. **Synoptic Reasoning & Scorecard**: BMA two-tone proportion bar, meteorologist diagnostic commentary, convergence metrics, IMD advisory card, and accuracy scorecard table.
+    7. **CSV Telemetry Export**: Single-click CSV download generation.
+    8. **Austere Floating Nav Dock with High-Contrast White Boundary**: Framed by a solid 2px white boundary (`border-2 border-white shadow-2xl shadow-black/80`) across all workstations to ensure crisp visual containment and separation against dark canvas backdrops (`#0A0A0A`). Retains strictly non-redundant controls: the top white 'CF' brand anchor routes to the Live Map Dashboard, followed by Severe Alerts, Model Comparison, active Station Analysis, and Platform Overview (eliminating duplicate dashboard and download icons).
 - **Strict Austere Dark Mode Standard**: ClimaFuse is permanently locked to its austere technical dark aesthetic (`#0A0A0A`). Dark/light toggles and light-mode overrides have been eliminated across the landing page and dashboard workstation to preserve operational contrast.
 - **Smooth Anchors**: Maintain anchor navigation IDs: `#product`, `#how-it-works`, `#why-climafuse`, `#outputs`, `#coverage`.
 

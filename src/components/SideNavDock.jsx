@@ -14,7 +14,7 @@ export default function SideNavDock() {
   return (
     <aside
       aria-label="Global System Navigation"
-      className="fixed left-6 top-6 z-50 hidden sm:flex flex-col items-center rounded-full bg-[#111111]/90 backdrop-blur-xl border border-[#262626] shadow-2xl p-1.5"
+      className="fixed left-6 top-6 z-50 hidden sm:flex flex-col items-center rounded-full bg-[#111111]/90 backdrop-blur-xl border-2 border-white shadow-2xl shadow-black/80 p-1.5"
     >
       {/* Brand Insignia */}
       <Link
@@ -29,7 +29,7 @@ export default function SideNavDock() {
       </Link>
 
       {/* Divider */}
-      <div className="w-5 h-px bg-[#262626] mb-1.5" />
+      <div className="w-5 h-px bg-white/20 mb-1.5" />
 
       {/* Navigation Items */}
       <div className="flex flex-col items-center space-y-1">

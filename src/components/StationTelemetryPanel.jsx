@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 /**
  * StationTelemetryPanel
@@ -281,13 +282,15 @@ export default function StationTelemetryPanel({ city, onBack }) {
 
       {/* 8. Full-Width Station Action Button */}
       <div className="pt-1 mt-auto">
-        <button
-          onClick={() => alert(`Operational synoptic telemetry for ${city.name} exported.`)}
-          className="flex items-center justify-center space-x-2 w-full py-3 rounded-xl bg-white hover:bg-[#e2e2e2] text-[#0a0a0a] font-sans text-xs font-bold transition-all cursor-pointer shadow-lg hover:shadow-xl active:scale-[0.99]"
+        <Link
+          to={`/station/${city.id}`}
+          className="flex items-center justify-center space-x-2 w-full py-3 rounded-xl bg-white hover:bg-[#e2e2e2] text-[#0a0a0a] font-sans text-xs font-bold transition-all cursor-pointer shadow-lg hover:shadow-xl active:scale-[0.99] group text-center"
         >
           <span>View Full Station Analytics &amp; Radiosonde</span>
-          <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-        </button>
+          <span className="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">
+            arrow_forward
+          </span>
+        </Link>
       </div>
     </aside>
   );
