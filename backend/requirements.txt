@@ -1,0 +1,35 @@
+# -----------------------------------------------------------------------------
+# ClimaFuse Backend Dependencies
+# -----------------------------------------------------------------------------
+
+# API & Web Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+
+# Database & Migrations
+sqlalchemy>=2.0.0
+alembic>=1.13.0
+pymysql>=1.1.0
+
+# Configuration & Validation
+pydantic>=2.9.0
+pydantic-settings>=2.4.0
+python-dotenv>=1.0.0
+
+# Scientific Computing & Data Processing
+scipy>=1.14.0
+numpy>=1.26.0
+pandas>=2.2.0
+xarray>=2024.6.0
+netCDF4>=1.7.0
+
+# Meteorological Data Acquisition
+herbie-data>=2024.8.0
+imdlib>=0.1.20
+cfgrib>=0.9.14
+eccodes>=1.7.0
+
+# Development & Testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+httpx>=0.27.0
