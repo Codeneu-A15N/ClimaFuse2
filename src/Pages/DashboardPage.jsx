@@ -4,12 +4,19 @@ import DashboardTopBar from '../components/DashboardTopBar';
 import MapComponent from '../components/MapComponent';
 import StationTelemetryPanel from '../components/StationTelemetryPanel';
 import NationalOverviewPanel from '../components/NationalOverviewPanel';
+import ModelWeightMap from '../components/ModelWeightMap';
+import ModelWeightAnalysisPanel from '../components/ModelWeightAnalysisPanel';
 import { CITIES } from '../api/cities';
+import { WEIGHT_REGIMES } from '../api/modelWeightsData';
 
 export default function DashboardPage() {
   const [selectedCity, setSelectedCity] = useState(null);
   const [activeOverlay, setActiveOverlay] = useState('temperature');
   const [activeTab, setActiveTab] = useState('map');
+  const [modelWeightRegime, setModelWeightRegime] = useState('thermal');
+  const [modelFocus, setModelFocus] = useState('blend');
+  const [selectedRegion, setSelectedRegion] = useState('maharashtra');
+  const [leadTime, setLeadTime] = useState('24h');
 
   return (
     <div className="bg-[#131313] text-[#e5e2e1] antialiased overflow-hidden w-screen h-screen select-none font-sans flex flex-col">
@@ -57,68 +64,41 @@ export default function DashboardPage() {
         )}
 
         {activeTab === 'comparison' && (
-          <div className="flex-1 h-full flex flex-col gap-2.5 min-h-0 min-w-0">
-            <DashboardTopBar onResetMap={() => setActiveTab('map')} />
-            <div className="flex-1 h-full rounded-2xl bg-[#0e0e0e] border border-[#262626]/70 p-6 flex flex-col justify-between overflow-y-auto">
-              <div>
-                <div className="flex items-center justify-between border-b border-[#262626] pb-4 mb-6">
-                  <div>
-                    <h2 className="font-['Plus_Jakarta_Sans',sans-serif] text-2xl font-bold text-white">
-                      Multi-Model Convergence &amp; Skill Verification
-                    </h2>
-                    <p className="font-sans text-sm text-[#a3a3a3] mt-1">
-                      Continuous Ranked Probability Score (CRPS) and RMSE benchmarks across lead times (T+0h to T+240h).
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTab('map')}
-                    className="px-4 py-1.5 rounded-full bg-[#201f1f] border border-[#262626] text-sm text-white hover:bg-[#2a2a2a] transition-colors cursor-pointer"
-                  >
-                    Back to Live Map
-                  </button>
-                </div>
+          <>
+            {/* LEFT / CENTER COLUMN: TopBar + Prominent Model Weight Map (~60% space) */}
+            <div className="relative flex-1 h-full flex flex-col gap-2.5 min-h-0 min-w-0">
+              {/* TOP NAVBAR (Takes required space above map only) */}
+              <DashboardTopBar onResetMap={() => setActiveTab('map')} />
 
-                {/* Model Comparison Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  <div className="p-5 rounded-2xl bg-[#121212] border border-[#262626]">
-                    <div className="font-mono text-xs text-[#a3a3a3] mb-1">PHYSICS NWP</div>
-                    <h3 className="text-xl font-bold text-white mb-2">ECMWF IFS HRES</h3>
-                    <p className="text-xs text-[#a3a3a3] leading-relaxed mb-4">
-                      High-res deterministic atmospheric conservation dynamics. Superior cyclonic track trajectory accuracy.
-                    </p>
-                    <div className="pt-3 border-t border-[#262626] flex justify-between text-xs font-mono">
-                      <span className="text-[#8e9192]">RMSE (Z500)</span>
-                      <span className="text-white font-semibold">14.2 m</span>
-                    </div>
-                  </div>
-
-                  <div className="p-5 rounded-2xl bg-[#121212] border border-[#262626]">
-                    <div className="font-mono text-xs text-[#a3a3a3] mb-1">DEEP LEARNING NWP</div>
-                    <h3 className="text-xl font-bold text-white mb-2">ECMWF AIFS</h3>
-                    <p className="text-xs text-[#a3a3a3] leading-relaxed mb-4">
-                      Graph Neural Network trained on 44 years of ERA5 reanalysis. 98.4% faster computation with lower RMSE at T+120h.
-                    </p>
-                    <div className="pt-3 border-t border-[#262626] flex justify-between text-xs font-mono">
-                      <span className="text-[#8e9192]">RMSE (Z500)</span>
-                      <span className="text-[#4edea3] font-semibold">12.8 m</span>
-                    </div>
-                  </div>
-
-                  <div className="p-5 rounded-2xl bg-[#121212] border border-[#4edea3]/40 shadow-lg">
-                    <div className="font-mono text-xs text-[#4edea3] mb-1">DYNAMIC ENSEMBLE</div>
-                    <h3 className="text-xl font-bold text-white mb-2">ClimaFuse BMA</h3>
-                    <p className="text-xs text-[#a3a3a3] leading-relaxed mb-4">
-                      Adaptive Bayesian Model Averaging calibrated by 800+ IMD AWS ground observations.
-                    </p>
-                    <div className="pt-3 border-t border-[#262626] flex justify-between text-xs font-mono">
-                      <span className="text-[#4edea3]">CRPS Skill Score</span>
-                      <span className="text-white font-semibold">+18.4% gain</span>
-                    </div>
-                  </div>
-                </div>
+              {/* ModelWeightMap Instance filling available height & width */}
+              <div className="relative flex-1 w-full min-h-0">
+                <ModelWeightMap
+                  activeRegime={modelWeightRegime}
+                  onRegimeChange={(r) => setModelWeightRegime(r)}
+                  activeModel={modelFocus}
+                  onModelChange={(m) => setModelFocus(m)}
+                  selectedRegion={selectedRegion}
+                  onSelectRegion={(regId) => setSelectedRegion(regId)}
+                  leadTime={leadTime}
+                  onLeadTimeChange={(lt) => setLeadTime(lt)}
+                />
               </div>
             </div>
-          </div>
+
+            {/* RIGHT COLUMN: Dedicated Model Weight Analysis Panel (~40% space) */}
+            <div className="w-full lg:w-[420px] xl:w-[450px] 2xl:w-[480px] shrink-0 h-full flex flex-col min-h-0">
+              <ModelWeightAnalysisPanel
+                selectedRegion={selectedRegion}
+                onSelectRegion={(regId) => setSelectedRegion(regId)}
+                activeRegime={modelWeightRegime}
+                onRegimeChange={(r) => setModelWeightRegime(r)}
+                leadTime={leadTime}
+                onLeadTimeChange={(lt) => setLeadTime(lt)}
+                activeModel={modelFocus}
+                onModelChange={(m) => setModelFocus(m)}
+              />
+            </div>
+          </>
         )}
 
         {activeTab === 'alerts' && (

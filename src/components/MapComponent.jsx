@@ -386,8 +386,8 @@ export default function MapComponent({
 
     // Subcontinental bounding box [SW, NE]
     const indiaBounds = [
-      [58.0, 4.0], // Southwest [lng, lat]
-      [102.0, 39.0], // Northeast [lng, lat]
+      [55.0, 2.0], // Southwest [lng, lat]
+      [106.0, 41.0], // Northeast [lng, lat]
     ];
 
     const selectedBasemap = BASEMAPS[currentBasemap] || BASEMAPS.physical;
@@ -396,9 +396,9 @@ export default function MapComponent({
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
       style: initialStyle,
-      center: isLanding ? [78.96, 22.2] : [79.2, 22.8],
-      zoom: isLanding ? 3.7 : 4.4,
-      minZoom: isLanding ? 3.2 : 3.5,
+      center: isLanding ? [78.96, 22.2] : [80.5, 21.8],
+      zoom: isLanding ? 3.7 : 3.85,
+      minZoom: isLanding ? 3.2 : 2.8,
       maxZoom: isLanding ? 6.5 : 8.5,
       maxBounds: indiaBounds,
       attributionControl: false,
@@ -410,6 +410,19 @@ export default function MapComponent({
     // CRITICAL FIX: In MapLibre, 'load' fires on initial mount
     map.on('load', () => {
       attachOverlays(map, currentBasemap);
+      if (!isLanding && !selectedCity) {
+        map.fitBounds(
+          [
+            [67.0, 6.2],
+            [97.8, 37.4],
+          ],
+          {
+            padding: { top: 45, bottom: 50, left: 35, right: 35 },
+            maxZoom: 4.2,
+            linear: true,
+          }
+        );
+      }
     });
 
     // Also listen to style.load for subsequent dynamic style changes
@@ -425,7 +438,18 @@ export default function MapComponent({
       });
     });
 
+    // ResizeObserver ensures container resizing recalculates map canvas cleanly
+    const resizeObserver = new ResizeObserver(() => {
+      if (mapRef.current) {
+        mapRef.current.resize();
+      }
+    });
+    if (mapContainerRef.current) {
+      resizeObserver.observe(mapContainerRef.current);
+    }
+
     return () => {
+      resizeObserver.disconnect();
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
       map.remove();
@@ -596,14 +620,39 @@ export default function MapComponent({
       {/* MapLibre GL DOM Container */}
       <div ref={mapContainerRef} className="w-full h-full flex-1" />
 
-      {/* Top Left: Geospatial HUD Telemetry Badge */}
-      <div className="absolute top-4 left-4 z-20 pointer-events-none flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-[#0e0e0e]/90 backdrop-blur-md border border-[#262626] font-mono text-[11px] text-[#a3a3a3] shadow-lg">
-        <span className="w-2 h-2 rounded-full bg-[#4edea3] animate-pulse" />
-        <span className="text-white font-medium">MapLibre GL</span>
-        <span className="text-[#444748]">|</span>
-        <span className="text-[#4edea3]">{BASEMAPS[currentBasemap]?.label || 'Physical Relief'}</span>
-        <span className="text-[#444748]">|</span>
-        <span className="text-[#e5e2e1]">{cursorCoords.lat}°N, {cursorCoords.lng}°E</span>
+      {/* Top Left: Geospatial HUD Telemetry Badge & Fit India Button */}
+      <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+        <div className="pointer-events-none flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-[#0e0e0e]/90 backdrop-blur-md border border-[#262626] font-mono text-[11px] text-[#a3a3a3] shadow-lg">
+          <span className="w-2 h-2 rounded-full bg-[#4edea3] animate-pulse" />
+          <span className="text-white font-medium">MapLibre GL</span>
+          <span className="text-[#444748]">|</span>
+          <span className="text-[#4edea3]">{BASEMAPS[currentBasemap]?.label || 'Physical Relief'}</span>
+          <span className="text-[#444748]">|</span>
+          <span className="text-[#e5e2e1]">{cursorCoords.lat}°N, {cursorCoords.lng}°E</span>
+        </div>
+        <button
+          onClick={() => {
+            if (mapRef.current) {
+              mapRef.current.fitBounds(
+                [
+                  [67.0, 6.2],
+                  [97.8, 37.4],
+                ],
+                {
+                  padding: { top: 45, bottom: 50, left: 35, right: 35 },
+                  maxZoom: 4.2,
+                  linear: true,
+                  duration: 500,
+                }
+              );
+            }
+          }}
+          title="Fit entire India in one frame"
+          className="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-[#0e0e0e]/90 backdrop-blur-md border border-[#262626] hover:border-[#4edea3]/60 text-white font-mono text-[11px] hover:bg-[#1a1a1a] transition-all cursor-pointer shadow-lg"
+        >
+          <span className="material-symbols-outlined text-[15px] text-[#4edea3]">crop_free</span>
+          <span className="hidden sm:inline font-semibold">Fit India</span>
+        </button>
       </div>
 
       {/* Top Right: Basemap Selector Pills */}

@@ -65,6 +65,18 @@ Climafuse/
     2. **Station Telemetry Mode (`selectedCity !== null`)**: Renders [`StationTelemetryPanel.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/StationTelemetryPanel.jsx) with high-density AWS station readouts, barometric pressure, UV index, 24h diurnal meteogram strip, and AI consensus blend.
   - **Bidirectional Layer Synchronization**: `activeOverlay` is managed in [`DashboardPage.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/Pages/DashboardPage.jsx) and synchronized between [`MapComponent.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/MapComponent.jsx) (bottom HUD buttons) and [`NationalOverviewPanel.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/NationalOverviewPanel.jsx) (synoptic layer cards).
   - **Seamless Navigation**: Users can click any city card in the warning bulletins list or any marker on the map to inspect station telemetry, and click `← All-India Overview` or `onResetMap` in the top bar to return to the national overview.
+- **Model Analysis & Convergence Architecture**:
+  - Located at `activeTab === 'comparison'` in [`DashboardPage.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/Pages/DashboardPage.jsx).
+  - Implements the exact **60% - 40% workstation split** matching the core dashboard architecture (`flex-1` map column on left, `w-full lg:w-[420px] xl:w-[450px] 2xl:w-[480px]` panel on right).
+  - **Left 60% Column**: Features [`ModelWeightMap.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/ModelWeightMap.jsx) expanding to the full available viewport height and width (`flex-1 w-full h-full min-h-0`) with MapLibre GL JS BMA weight heatmaps.
+  - **Single-Frame All-India Standard**: Captures the entire landmass of India from Jammu & Kashmir / Ladakh down to Kanyakumari / Kerala in one single frame without map panning or page scrolling. Enforced via automated `map.fitBounds([[67.0, 6.2], [97.8, 37.5]])` with `{ top: 40, bottom: 50, left: 20, right: 20 }`, initial `center: [82.0, 21.8]`, `zoom: 3.5`, `ResizeObserver`, and a HUD `Fit India` button.
+  - **Right 40% Column**: Houses [`ModelWeightAnalysisPanel.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/ModelWeightAnalysisPanel.jsx):
+    1. **Lead Time Selection**: Pills for `24 Hours`, `3 Days`, `7 Days`, and `14 Days` dynamically recalculating model weights.
+    2. **Model Weight Composition (Selected Region)**: Dropdown region selector + custom SVG Donut Chart showing the 3-model breakdown (IFS, AIFS, NCMRWF) and CRPS skill gain.
+    3. **Model Weights by Lead Time**: Recharts timeseries line chart across lead times (`0-6h`, `6-24h`, `1-3d`, `3-7d`, `7-14d`) in ClimaFuse's austere dark SaaS styling.
+    4. **Dominant Attribution & Terrain Physics Rationale**: Scientific mechanism and dominant weight scale bar.
+    5. **Inspectable Full Matrix Modal**: Popover drawer to view the complete 12-region attribution matrix and lead-time CRPS benchmarks.
+  - Supports 3 weight regimes: **Thermal Weights**, **Precipitation Weights**, and **Heat Index Weights**, combined with 3 basemaps (Physical Relief, Topographic, Satellite) and 4 model focus modes (Consensus Blend, ECMWF IFS, ECMWF AIFS, NCMRWF).
 - **Strict Austere Dark Mode Standard**: ClimaFuse is permanently locked to its austere technical dark aesthetic (`#0A0A0A`). Dark/light toggles and light-mode overrides have been eliminated across the landing page and dashboard workstation to preserve operational contrast.
 - **Smooth Anchors**: Maintain anchor navigation IDs: `#product`, `#how-it-works`, `#why-climafuse`, `#outputs`, `#coverage`.
 
