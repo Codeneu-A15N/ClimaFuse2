@@ -108,6 +108,7 @@ export const BASEMAPS = {
 
 // Check for optional MapTiler API Key in environment
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
+const INDIA_GEOJSON_URL = `${import.meta.env.BASE_URL || '/'}india.geojson`;
 if (MAPTILER_KEY) {
   BASEMAPS.maptilerTopo = {
     id: 'maptilerTopo',
@@ -162,39 +163,43 @@ export default function MapComponent({
     if (!map || !map.isStyleLoaded()) return;
 
     // 1. Load India GeoJSON boundary from /public/india.geojson
-    if (!map.getSource('india-boundary')) {
-      map.addSource('india-boundary', {
-        type: 'geojson',
-        data: '/india.geojson',
-      });
-    }
+    try {
+      if (!map.getSource('india-boundary')) {
+        map.addSource('india-boundary', {
+          type: 'geojson',
+          data: INDIA_GEOJSON_URL,
+        });
+      }
 
-    // Semi-transparent base fill
-    if (!map.getLayer('india-land-fill')) {
-      map.addLayer({
-        id: 'india-land-fill',
-        type: 'fill',
-        source: 'india-boundary',
-        paint: {
-          'fill-color': '#38bdf8',
-          'fill-opacity': 0.02,
-          'fill-antialias': true,
-        },
-      });
-    }
+      // Semi-transparent base fill
+      if (!map.getLayer('india-land-fill')) {
+        map.addLayer({
+          id: 'india-land-fill',
+          type: 'fill',
+          source: 'india-boundary',
+          paint: {
+            'fill-color': '#38bdf8',
+            'fill-opacity': 0.02,
+            'fill-antialias': true,
+          },
+        });
+      }
 
-    // Crisp national boundary line
-    if (!map.getLayer('india-outline')) {
-      map.addLayer({
-        id: 'india-outline',
-        type: 'line',
-        source: 'india-boundary',
-        paint: {
-          'line-color': activeBasemapKey === 'satellite' ? '#38bdf8' : '#0284c7',
-          'line-width': isLanding ? 1.5 : 2,
-          'line-opacity': 0.85,
-        },
-      });
+      // Crisp national boundary line
+      if (!map.getLayer('india-outline')) {
+        map.addLayer({
+          id: 'india-outline',
+          type: 'line',
+          source: 'india-boundary',
+          paint: {
+            'line-color': activeBasemapKey === 'satellite' ? '#38bdf8' : '#0284c7',
+            'line-width': isLanding ? 1.5 : 2,
+            'line-opacity': 0.85,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Failed to attach India boundary overlay:', error);
     }
 
     // 2. Load subcontinental atmospheric observation dataset
