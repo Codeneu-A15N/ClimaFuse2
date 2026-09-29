@@ -22,7 +22,7 @@ export default function SideNavDock() {
         className="group relative flex items-center justify-center w-10 h-10 rounded-full text-white hover:bg-[#181818] transition-colors duration-150 mb-1"
         aria-label="ClimaFuse Home"
       >
-        <span className="material-symbols-outlined text-[20px] font-bold">hub</span>
+        <img src="/weather.png" alt="ClimaFuse" className="w-6 h-6 object-contain rounded-full shadow-sm" />
         <span className="absolute left-14 px-2.5 py-1 rounded bg-[#181818] border border-[#262626] text-[0.6875rem] font-mono text-[#e5e2e1] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl z-50">
           ClimaFuse Platform
         </span>

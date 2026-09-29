@@ -30,7 +30,8 @@ export default function StationTopBar({ station, currentCycle = 'Operational For
     <header className="h-14 border-b border-[#262626] bg-[#121212]/95 backdrop-blur-md sticky top-0 z-40 flex items-center justify-between px-4 lg:px-8 pl-16 lg:pl-20 w-full select-none">
       {/* Left: Brand & Breadcrumb City Selector */}
       <div className="flex items-center gap-3 lg:gap-4 min-w-0">
-        <Link to="/dashboard" className="flex items-center gap-2 group shrink-0">
+        <Link to="/dashboard" className="flex items-center gap-2.5 group shrink-0">
+          <img src="/weather.png" alt="ClimaFuse Icon" className="w-5 h-5 object-contain rounded-full shadow-sm ring-1 ring-white/10" />
           <span className="font-['Plus_Jakarta_Sans',sans-serif] text-base lg:text-lg font-bold tracking-tight text-white group-hover:text-[#4edea3] transition-colors">
             ClimaFuse
           </span>

@@ -108,7 +108,7 @@ export const BASEMAPS = {
 
 // Check for optional MapTiler API Key in environment
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
-const INDIA_GEOJSON_URL = `${import.meta.env.BASE_URL || '/'}india.geojson`;
+const INDIA_GEOJSON_URL = '/india.geojson';
 if (MAPTILER_KEY) {
   BASEMAPS.maptilerTopo = {
     id: 'maptilerTopo',
@@ -160,7 +160,7 @@ export default function MapComponent({
 
   // Helper to attach India boundary and atmospheric telemetry layers to current style
   const attachOverlays = (map, activeBasemapKey) => {
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map || !map.getStyle()) return;
 
     // 1. Load India GeoJSON boundary from /public/india.geojson
     try {
@@ -179,7 +179,7 @@ export default function MapComponent({
           source: 'india-boundary',
           paint: {
             'fill-color': '#38bdf8',
-            'fill-opacity': 0.02,
+            'fill-opacity': currentOverlay === 'default' ? 0.02 : 0.06,
             'fill-antialias': true,
           },
         });
@@ -199,15 +199,22 @@ export default function MapComponent({
         });
       }
     } catch (error) {
-      console.error('Failed to attach India boundary overlay:', error);
+      console.warn('India boundary source notice:', error);
     }
 
     // 2. Load subcontinental atmospheric observation dataset
-    if (!map.getSource('atmospheric-telemetry')) {
-      map.addSource('atmospheric-telemetry', {
-        type: 'geojson',
-        data: getAtmosphericGeoJSON(),
-      });
+    try {
+      const atmosphericData = getAtmosphericGeoJSON();
+      if (!map.getSource('atmospheric-telemetry')) {
+        map.addSource('atmospheric-telemetry', {
+          type: 'geojson',
+          data: atmosphericData,
+        });
+      } else {
+        map.getSource('atmospheric-telemetry').setData(atmosphericData);
+      }
+    } catch (error) {
+      console.warn('Atmospheric telemetry source notice:', error);
     }
 
     // 3. Thermal Heatmap Layer
@@ -224,39 +231,40 @@ export default function MapComponent({
             'interpolate',
             ['linear'],
             ['get', 'temp'],
-            10, 0.2,
-            25, 0.5,
-            34, 0.8,
-            42, 1.0,
+            10, 0.25,
+            20, 0.45,
+            28, 0.7,
+            36, 0.9,
+            44, 1.0,
           ],
           'heatmap-intensity': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 1.8,
-            5, 2.8,
-            7, 4.0,
+            3, 2.4,
+            5, 3.4,
+            7, 4.5,
           ],
           'heatmap-color': [
             'interpolate',
             ['linear'],
             ['heatmap-density'],
             0, 'rgba(0, 0, 0, 0)',
-            0.15, 'rgba(59, 130, 246, 0.75)',  // Deep Blue (Cool)
-            0.35, 'rgba(16, 185, 129, 0.8)',   // Emerald (Mild)
-            0.55, 'rgba(251, 191, 36, 0.85)',  // Yellow (Warm)
-            0.75, 'rgba(249, 115, 22, 0.9)',   // Orange (Hot)
-            1.0, 'rgba(239, 68, 68, 0.95)',    // Crimson Red (Extreme Heat)
+            0.04, 'rgba(59, 130, 246, 0.45)',  // Deep Blue (Cool)
+            0.2, 'rgba(16, 185, 129, 0.75)',   // Emerald (Mild)
+            0.45, 'rgba(251, 191, 36, 0.85)',  // Yellow (Warm)
+            0.7, 'rgba(249, 115, 22, 0.9)',    // Orange (Hot)
+            1.0, 'rgba(239, 68, 68, 0.96)',    // Crimson Red (Extreme Heat)
           ],
           'heatmap-radius': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 60,
-            5, 110,
-            7, 180,
+            3, 85,
+            5, 140,
+            7, 220,
           ],
-          'heatmap-opacity': 0.85,
+          'heatmap-opacity': 0.88,
         },
       });
     }
@@ -275,38 +283,39 @@ export default function MapComponent({
             'interpolate',
             ['linear'],
             ['get', 'precipitation'],
-            0, 0,
-            15, 0.25,
-            50, 0.6,
-            120, 1.0,
+            0, 0.05,
+            10, 0.3,
+            35, 0.65,
+            80, 0.9,
+            140, 1.0,
           ],
           'heatmap-intensity': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 1.8,
-            5, 2.8,
-            7, 4.0,
+            3, 2.4,
+            5, 3.4,
+            7, 4.5,
           ],
           'heatmap-color': [
             'interpolate',
             ['linear'],
             ['heatmap-density'],
             0, 'rgba(0, 0, 0, 0)',
-            0.15, 'rgba(56, 189, 248, 0.75)', // Sky blue (Light rain)
-            0.4, 'rgba(2, 132, 199, 0.82)',   // Ocean blue (Moderate rain)
-            0.7, 'rgba(29, 78, 216, 0.88)',   // Deep blue (Heavy rain)
-            1.0, 'rgba(79, 70, 229, 0.95)',   // Indigo / Storm purple (Intense)
+            0.04, 'rgba(56, 189, 248, 0.45)', // Sky blue (Light rain)
+            0.25, 'rgba(2, 132, 199, 0.8)',   // Ocean blue (Moderate rain)
+            0.6, 'rgba(29, 78, 216, 0.88)',   // Deep blue (Heavy rain)
+            1.0, 'rgba(79, 70, 229, 0.96)',   // Indigo / Storm purple (Intense)
           ],
           'heatmap-radius': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 50,
-            5, 95,
-            7, 160,
+            3, 80,
+            5, 135,
+            7, 210,
           ],
-          'heatmap-opacity': 0.85,
+          'heatmap-opacity': 0.88,
         },
       });
     }
@@ -325,44 +334,44 @@ export default function MapComponent({
             'interpolate',
             ['linear'],
             ['get', 'heatIndex'],
-            15, 0.15,
-            28, 0.4,
-            38, 0.75,
-            48, 1.0,
+            15, 0.2,
+            26, 0.45,
+            35, 0.75,
+            44, 1.0,
           ],
           'heatmap-intensity': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 1.8,
-            5, 2.8,
-            7, 4.0,
+            3, 2.4,
+            5, 3.4,
+            7, 4.5,
           ],
           'heatmap-color': [
             'interpolate',
             ['linear'],
             ['heatmap-density'],
             0, 'rgba(0, 0, 0, 0)',
-            0.2, 'rgba(16, 185, 129, 0.75)',  // Emerald (Safe / Normal)
-            0.45, 'rgba(251, 191, 36, 0.82)', // Yellow (Caution)
-            0.7, 'rgba(249, 115, 22, 0.88)',  // Orange (Extreme Caution)
-            0.88, 'rgba(239, 68, 68, 0.92)',  // Crimson Red (Danger)
-            1.0, 'rgba(168, 85, 247, 0.98)',  // Violet / Purple (Extreme Danger)
+            0.04, 'rgba(16, 185, 129, 0.45)',  // Emerald (Safe / Normal)
+            0.22, 'rgba(251, 191, 36, 0.8)',   // Yellow (Caution)
+            0.5, 'rgba(249, 115, 22, 0.88)',   // Orange (Extreme Caution)
+            0.78, 'rgba(239, 68, 68, 0.92)',   // Crimson Red (Danger)
+            1.0, 'rgba(168, 85, 247, 0.98)',   // Violet / Purple (Extreme Danger)
           ],
           'heatmap-radius': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 60,
-            5, 110,
-            7, 180,
+            3, 85,
+            5, 140,
+            7, 220,
           ],
-          'heatmap-opacity': 0.85,
+          'heatmap-opacity': 0.88,
         },
       });
     }
 
-    // 6. Observation Station Data Points (Visible when overlay is active)
+    // 6. Observation Station Data Points (Illuminated Nodes)
     if (!map.getLayer('atmospheric-points')) {
       map.addLayer({
         id: 'atmospheric-points',
@@ -372,11 +381,22 @@ export default function MapComponent({
           visibility: currentOverlay !== 'default' ? 'visible' : 'none',
         },
         paint: {
-          'circle-radius': 3.5,
-          'circle-color': '#ffffff',
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            3, 4,
+            6, 7,
+          ],
+          'circle-color': [
+            'case',
+            ['==', ['literal', currentOverlay], 'rainfall'], '#38bdf8',
+            ['==', ['literal', currentOverlay], 'heatmap'], '#f97316',
+            '#4edea3',
+          ],
           'circle-stroke-width': 1.5,
           'circle-stroke-color': '#000000',
-          'circle-opacity': 0.85,
+          'circle-opacity': 0.9,
         },
       });
     }
@@ -483,7 +503,7 @@ export default function MapComponent({
     if (!map) return;
 
     if (!map.getLayer('thermal-heatmap')) {
-      if (map.isStyleLoaded()) {
+      if (map.getStyle()) {
         attachOverlays(map, currentBasemap);
       }
     }
@@ -512,6 +532,20 @@ export default function MapComponent({
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
+    // Distinct non-overlapping geographic anchor alignments for closely positioned stations
+    const CITY_POSITIONS = {
+      mumbai: { anchor: 'bottom-right', offset: [-12, -4] },
+      pune: { anchor: 'top-left', offset: [12, 4] },
+      bengaluru: { anchor: 'bottom-right', offset: [-12, -4] },
+      chennai: { anchor: 'bottom-left', offset: [12, -4] },
+      jaipur: { anchor: 'bottom-right', offset: [-10, -4] },
+      lucknow: { anchor: 'bottom-left', offset: [10, -4] },
+      delhi: { anchor: 'bottom', offset: [0, -8] },
+      ahmedabad: { anchor: 'bottom-right', offset: [-10, -4] },
+      kolkata: { anchor: 'bottom-left', offset: [10, -4] },
+      hyderabad: { anchor: 'bottom', offset: [0, -6] },
+    };
+
     cityList.forEach((city) => {
       const isSelected = currentSelected?.id === city.id;
       const el = document.createElement('div');
@@ -533,7 +567,7 @@ export default function MapComponent({
         }`;
 
         el.innerHTML = `
-          <div class="relative flex items-center space-x-1.5 px-2.5 py-1 rounded-full backdrop-blur-md shadow-xl transition-all ${
+          <div class="relative flex items-center space-x-1.5 px-2.5 py-1 rounded-full backdrop-blur-md shadow-xl transition-all whitespace-nowrap ${
             isSelected
               ? 'bg-[#181818] border-2 border-white'
               : 'bg-[#111111]/90 border border-[#353534] hover:border-white'
@@ -562,7 +596,12 @@ export default function MapComponent({
         }
       });
 
-      const marker = new maplibregl.Marker({ element: el, anchor: landingMode ? 'center' : 'bottom' })
+      const cityPos = CITY_POSITIONS[city.id] || { anchor: 'bottom', offset: [0, -4] };
+      const marker = new maplibregl.Marker({
+        element: el,
+        anchor: landingMode ? 'center' : cityPos.anchor,
+        offset: landingMode ? [0, 0] : cityPos.offset,
+      })
         .setLngLat([city.lon, city.lat])
         .addTo(map);
 
@@ -743,7 +782,7 @@ export default function MapComponent({
  * Updates visibility and properties for atmospheric heatmap layers
  */
 function applyMeteorologicalLayer(map, layerType) {
-  if (!map || !map.isStyleLoaded()) return;
+  if (!map || !map.getStyle()) return;
 
   const thermalLayer = map.getLayer('thermal-heatmap');
   const precipLayer = map.getLayer('precipitation-heatmap');
@@ -761,6 +800,10 @@ function applyMeteorologicalLayer(map, layerType) {
   }
   if (pointsLayer) {
     map.setLayoutProperty('atmospheric-points', 'visibility', layerType !== 'default' ? 'visible' : 'none');
+    if (layerType !== 'default') {
+      const dotColor = layerType === 'rainfall' ? '#38bdf8' : layerType === 'heatmap' ? '#f97316' : '#4edea3';
+      map.setPaintProperty('atmospheric-points', 'circle-color', dotColor);
+    }
   }
 
   // Base boundary fill opacity
@@ -768,7 +811,7 @@ function applyMeteorologicalLayer(map, layerType) {
     map.setPaintProperty(
       'india-land-fill',
       'fill-opacity',
-      layerType === 'default' ? 0.02 : 0.08
+      layerType === 'default' ? 0.02 : 0.06
     );
   }
 }

@@ -49,7 +49,8 @@ export default function DashboardTopBar({ onResetMap }) {
       <div className="w-full flex items-center justify-between px-4 py-2 rounded-2xl bg-[#121212]/90 backdrop-blur-xl border border-[#262626]/80 shadow-lg">
         {/* Left: Brand Title & Live Pulse Badge */}
         <div className="flex items-center space-x-3">
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2.5">
+            <img src="/weather.png" alt="ClimaFuse Icon" className="w-6 h-6 object-contain rounded-full shadow-sm ring-1 ring-white/10" />
             <span className="font-['Plus_Jakarta_Sans',sans-serif] text-lg font-bold tracking-tight text-white hover:text-[#4edea3] transition-colors">
               ClimaFuse
             </span>

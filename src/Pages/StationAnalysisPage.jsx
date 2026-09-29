@@ -27,10 +27,10 @@ export default function StationAnalysisPage() {
         {/* Brand Anchor Mini Icon */}
         <Link
           to="/dashboard"
-          className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-neutral-950 font-bold text-sm mb-1 hover:bg-[#e2e2e2] transition-colors"
+          className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-[#201f1f] transition-colors mb-1"
           title="ClimaFuse Dashboard"
         >
-          CF
+          <img src="/weather.png" alt="ClimaFuse Icon" className="w-7 h-7 object-contain rounded-full shadow-sm ring-1 ring-white/10" />
         </Link>
 
         {/* 1. Severe Alerts */}

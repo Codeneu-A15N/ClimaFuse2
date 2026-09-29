@@ -96,11 +96,11 @@ export default function ModelWeightMap({
 
   // Helper to attach India boundary and Model Weight layers
   const attachWeightLayers = (map, basemapKey, regimeKey, modelKey, leadKey) => {
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map || !map.getStyle()) return;
 
     // 1. India GeoJSON boundary
     if (!map.getSource('india-boundary')) {
-      const indiaGeojsonUrl = `${import.meta.env.BASE_URL || '/'}india.geojson`;
+      const indiaGeojsonUrl = '/india.geojson';
       map.addSource('india-boundary', {
         type: 'geojson',
         data: indiaGeojsonUrl,

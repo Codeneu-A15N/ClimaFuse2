@@ -9,6 +9,20 @@ export default function DashboardNavDock({ activeTab = 'map', setActiveTab }) {
       aria-label="Dashboard Dock Navigation"
     >
       <nav aria-label="Main Navigation" className="flex flex-col items-center space-y-2">
+        {/* Brand Icon */}
+        <Link
+          to="/"
+          className="group relative flex items-center justify-center w-10 h-10 rounded-xl hover:bg-[#1c1b1b] transition-colors"
+          title="ClimaFuse Home"
+        >
+          <img src="/weather.png" alt="ClimaFuse" className="w-6 h-6 object-contain rounded-full shadow-sm ring-1 ring-white/10" />
+          <span className="absolute left-14 px-2.5 py-1 rounded-lg bg-[#353534] text-white font-mono text-[0.6875rem] tracking-wide whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity border border-[#444748] shadow-lg z-50">
+            ClimaFuse Home
+          </span>
+        </Link>
+
+        <div className="w-6 h-px bg-white/20 mb-1" />
+
         {/* Tab 1: Dashboard / Map (ACTIVE) */}
         <button
           onClick={() => setActiveTab && setActiveTab('map')}
