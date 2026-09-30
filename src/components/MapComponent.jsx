@@ -108,7 +108,7 @@ export const BASEMAPS = {
 
 // Check for optional MapTiler API Key in environment
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
-const INDIA_GEOJSON_URL = `${import.meta.env.BASE_URL || '/'}india.geojson`;
+const INDIA_GEOJSON_URL = '/india.geojson';
 if (MAPTILER_KEY) {
   BASEMAPS.maptilerTopo = {
     id: 'maptilerTopo',
@@ -162,12 +162,12 @@ export default function MapComponent({
   const attachOverlays = (map, activeBasemapKey) => {
     if (!map || !map.isStyleLoaded()) return;
 
-    // 1. Load India GeoJSON boundary from /public/india.geojson
+    // 1. Load India GeoJSON boundary from in-memory dataset
     try {
       if (!map.getSource('india-boundary')) {
         map.addSource('india-boundary', {
           type: 'geojson',
-          data: INDIA_GEOJSON_URL,
+          data: INDIA_GEOJSON,
         });
       }
 
@@ -179,7 +179,7 @@ export default function MapComponent({
           source: 'india-boundary',
           paint: {
             'fill-color': '#38bdf8',
-            'fill-opacity': 0.02,
+            'fill-opacity': currentOverlay === 'default' ? 0.02 : 0.06,
             'fill-antialias': true,
           },
         });
@@ -199,18 +199,25 @@ export default function MapComponent({
         });
       }
     } catch (error) {
-      console.error('Failed to attach India boundary overlay:', error);
+      console.warn('India boundary source notice:', error);
     }
 
     // 2. Load subcontinental atmospheric observation dataset
-    if (!map.getSource('atmospheric-telemetry')) {
-      map.addSource('atmospheric-telemetry', {
-        type: 'geojson',
-        data: getAtmosphericGeoJSON(),
-      });
+    try {
+      const atmosphericData = getAtmosphericGeoJSON();
+      if (!map.getSource('atmospheric-telemetry')) {
+        map.addSource('atmospheric-telemetry', {
+          type: 'geojson',
+          data: atmosphericData,
+        });
+      } else {
+        map.getSource('atmospheric-telemetry').setData(atmosphericData);
+      }
+    } catch (error) {
+      console.warn('Atmospheric telemetry source notice:', error);
     }
 
-    // 3. Thermal Heatmap Layer
+    // 3. Thermal Heatmap Layer (Realistic Meteorological Gradient)
     if (!map.getLayer('thermal-heatmap')) {
       map.addLayer({
         id: 'thermal-heatmap',
@@ -224,8 +231,10 @@ export default function MapComponent({
             'interpolate',
             ['linear'],
             ['get', 'temp'],
-            10, 0.2,
-            25, 0.5,
+            10, 0.05,
+            18, 0.2,
+            24, 0.4,
+            29, 0.6,
             34, 0.8,
             42, 1.0,
           ],
@@ -233,35 +242,36 @@ export default function MapComponent({
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 1.8,
-            5, 2.8,
-            7, 4.0,
+            3, 0.85,
+            5, 1.25,
+            7, 1.8,
           ],
           'heatmap-color': [
             'interpolate',
             ['linear'],
             ['heatmap-density'],
             0, 'rgba(0, 0, 0, 0)',
-            0.15, 'rgba(59, 130, 246, 0.75)',  // Deep Blue (Cool)
-            0.35, 'rgba(16, 185, 129, 0.8)',   // Emerald (Mild)
-            0.55, 'rgba(251, 191, 36, 0.85)',  // Yellow (Warm)
-            0.75, 'rgba(249, 115, 22, 0.9)',   // Orange (Hot)
-            1.0, 'rgba(239, 68, 68, 0.95)',    // Crimson Red (Extreme Heat)
+            0.1, 'rgba(56, 189, 248, 0.45)',   // Cool Sky Blue (Himalayas / High Altitude, ~10-18°C)
+            0.28, 'rgba(45, 212, 191, 0.62)',  // Soft Teal / Aquamarine (~18-23°C)
+            0.46, 'rgba(74, 222, 128, 0.7)',   // Temperate Green (~23-27°C, Deccan/Plateaus)
+            0.64, 'rgba(250, 204, 21, 0.78)',  // Golden Yellow (~27-31°C, Gangetic Plains)
+            0.82, 'rgba(251, 146, 60, 0.85)',  // Warm Amber / Soft Orange (~32-35°C)
+            1.0, 'rgba(239, 68, 68, 0.92)',    // Crimson Red (Peak Hot Zones ONLY, >36°C, Thar)
           ],
           'heatmap-radius': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 60,
-            5, 110,
-            7, 180,
+            3, 48,
+            5, 85,
+            7, 145,
           ],
-          'heatmap-opacity': 0.85,
+          'heatmap-opacity': 0.72,
         },
       });
     }
 
-    // 4. Precipitation Heatmap Layer
+    // 4. Precipitation Heatmap Layer (Accurate Rainfall Distribution)
     if (!map.getLayer('precipitation-heatmap')) {
       map.addLayer({
         id: 'precipitation-heatmap',
@@ -275,43 +285,46 @@ export default function MapComponent({
             'interpolate',
             ['linear'],
             ['get', 'precipitation'],
-            0, 0,
-            15, 0.25,
-            50, 0.6,
-            120, 1.0,
+            0, 0.0,
+            5, 0.15,
+            20, 0.35,
+            50, 0.65,
+            100, 0.88,
+            160, 1.0,
           ],
           'heatmap-intensity': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 1.8,
-            5, 2.8,
-            7, 4.0,
+            3, 0.85,
+            5, 1.25,
+            7, 1.8,
           ],
           'heatmap-color': [
             'interpolate',
             ['linear'],
             ['heatmap-density'],
             0, 'rgba(0, 0, 0, 0)',
-            0.15, 'rgba(56, 189, 248, 0.75)', // Sky blue (Light rain)
-            0.4, 'rgba(2, 132, 199, 0.82)',   // Ocean blue (Moderate rain)
-            0.7, 'rgba(29, 78, 216, 0.88)',   // Deep blue (Heavy rain)
-            1.0, 'rgba(79, 70, 229, 0.95)',   // Indigo / Storm purple (Intense)
+            0.1, 'rgba(186, 230, 253, 0.4)',  // Trace mist / light drizzle (0-5 mm)
+            0.3, 'rgba(56, 189, 248, 0.62)',  // Light blue (5-20 mm)
+            0.55, 'rgba(14, 165, 233, 0.76)', // Ocean blue (20-50 mm)
+            0.78, 'rgba(37, 99, 235, 0.86)',  // Deep blue (50-100 mm)
+            1.0, 'rgba(79, 70, 229, 0.95)',   // Indigo / Storm peak (100+ mm, Western Ghats/Meghalaya)
           ],
           'heatmap-radius': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 50,
-            5, 95,
-            7, 160,
+            3, 44,
+            5, 80,
+            7, 135,
           ],
-          'heatmap-opacity': 0.85,
+          'heatmap-opacity': 0.72,
         },
       });
     }
 
-    // 5. Heat Index Heatmap Layer
+    // 5. Heat Index Heatmap Layer (Biometeorological Stress)
     if (!map.getLayer('heat-index-heatmap')) {
       map.addLayer({
         id: 'heat-index-heatmap',
@@ -325,44 +338,46 @@ export default function MapComponent({
             'interpolate',
             ['linear'],
             ['get', 'heatIndex'],
-            15, 0.15,
+            12, 0.05,
+            20, 0.18,
             28, 0.4,
-            38, 0.75,
+            34, 0.65,
+            40, 0.88,
             48, 1.0,
           ],
           'heatmap-intensity': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 1.8,
-            5, 2.8,
-            7, 4.0,
+            3, 0.85,
+            5, 1.25,
+            7, 1.8,
           ],
           'heatmap-color': [
             'interpolate',
             ['linear'],
             ['heatmap-density'],
             0, 'rgba(0, 0, 0, 0)',
-            0.2, 'rgba(16, 185, 129, 0.75)',  // Emerald (Safe / Normal)
-            0.45, 'rgba(251, 191, 36, 0.82)', // Yellow (Caution)
-            0.7, 'rgba(249, 115, 22, 0.88)',  // Orange (Extreme Caution)
-            0.88, 'rgba(239, 68, 68, 0.92)',  // Crimson Red (Danger)
-            1.0, 'rgba(168, 85, 247, 0.98)',  // Violet / Purple (Extreme Danger)
+            0.14, 'rgba(52, 211, 153, 0.42)', // Mint Emerald (Safe / Comfortable, <24°C)
+            0.36, 'rgba(250, 204, 21, 0.68)', // Golden Yellow (Caution, 25-32°C)
+            0.6, 'rgba(251, 146, 60, 0.82)',  // Amber Orange (Extreme Caution, 33-38°C)
+            0.82, 'rgba(239, 68, 68, 0.9)',   // Coral Crimson (Danger, 39-44°C)
+            1.0, 'rgba(168, 85, 247, 0.96)',  // Purple Violet (Extreme Danger, >45°C)
           ],
           'heatmap-radius': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 60,
-            5, 110,
-            7, 180,
+            3, 48,
+            5, 85,
+            7, 145,
           ],
-          'heatmap-opacity': 0.85,
+          'heatmap-opacity': 0.72,
         },
       });
     }
 
-    // 6. Observation Station Data Points (Visible when overlay is active)
+    // 6. Observation Station Data Points (Subtle Illuminated Data Nodes)
     if (!map.getLayer('atmospheric-points')) {
       map.addLayer({
         id: 'atmospheric-points',
@@ -372,10 +387,17 @@ export default function MapComponent({
           visibility: currentOverlay !== 'default' ? 'visible' : 'none',
         },
         paint: {
-          'circle-radius': 3.5,
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            3, 2.5,
+            5, 3.5,
+            7, 5,
+          ],
           'circle-color': '#ffffff',
-          'circle-stroke-width': 1.5,
-          'circle-stroke-color': '#000000',
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#111111',
           'circle-opacity': 0.85,
         },
       });
@@ -461,8 +483,14 @@ export default function MapComponent({
     };
   }, []);
 
-  // Switch basemap style when currentBasemap changes
+  const isInitialBasemapMount = useRef(true);
+
+  // Switch basemap style when currentBasemap changes (skipping initial mount)
   useEffect(() => {
+    if (isInitialBasemapMount.current) {
+      isInitialBasemapMount.current = false;
+      return;
+    }
     const map = mapRef.current;
     if (!map) return;
 
@@ -482,13 +510,17 @@ export default function MapComponent({
     const map = mapRef.current;
     if (!map) return;
 
-    if (!map.getLayer('thermal-heatmap')) {
-      if (map.isStyleLoaded()) {
+    if (map.isStyleLoaded()) {
+      if (!map.getLayer('thermal-heatmap')) {
         attachOverlays(map, currentBasemap);
       }
+      applyMeteorologicalLayer(map, currentOverlay);
+    } else {
+      map.once('load', () => {
+        attachOverlays(map, currentBasemap);
+        applyMeteorologicalLayer(map, currentOverlay);
+      });
     }
-
-    applyMeteorologicalLayer(map, currentOverlay);
   }, [currentOverlay]);
 
   // Sync DOM Markers for cities
@@ -512,6 +544,20 @@ export default function MapComponent({
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
+    // Distinct non-overlapping geographic anchor alignments for closely positioned stations
+    const CITY_POSITIONS = {
+      mumbai: { anchor: 'bottom-right', offset: [-12, -4] },
+      pune: { anchor: 'top-left', offset: [12, 4] },
+      bengaluru: { anchor: 'bottom-right', offset: [-12, -4] },
+      chennai: { anchor: 'bottom-left', offset: [12, -4] },
+      jaipur: { anchor: 'bottom-right', offset: [-10, -4] },
+      lucknow: { anchor: 'bottom-left', offset: [10, -4] },
+      delhi: { anchor: 'bottom', offset: [0, -8] },
+      ahmedabad: { anchor: 'bottom-right', offset: [-10, -4] },
+      kolkata: { anchor: 'bottom-left', offset: [10, -4] },
+      hyderabad: { anchor: 'bottom', offset: [0, -6] },
+    };
+
     cityList.forEach((city) => {
       const isSelected = currentSelected?.id === city.id;
       const el = document.createElement('div');
@@ -528,29 +574,24 @@ export default function MapComponent({
           </div>
         `;
       } else {
-        el.className = `group cursor-pointer transition-all duration-200 ${
-          isSelected ? 'z-30 scale-110' : 'z-20 hover:scale-105'
-        }`;
+        el.className = `group cursor-pointer transition-all duration-200 ${isSelected ? 'z-30 scale-110' : 'z-20 hover:scale-105'
+          }`;
 
         el.innerHTML = `
-          <div class="relative flex items-center space-x-1.5 px-2.5 py-1 rounded-full backdrop-blur-md shadow-xl transition-all ${
-            isSelected
-              ? 'bg-[#181818] border-2 border-white'
-              : 'bg-[#111111]/90 border border-[#353534] hover:border-white'
+          <div class="relative flex items-center space-x-1.5 px-2.5 py-1 rounded-full backdrop-blur-md shadow-xl transition-all whitespace-nowrap ${isSelected
+            ? 'bg-[#181818] border-2 border-white'
+            : 'bg-[#111111]/90 border border-[#353534] hover:border-white'
           }">
-            <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${city.alertColor}; ${
-              city.alertTier === 'Red'
-                ? 'animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;'
-                : ''
-            }"></span>
+            <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${city.alertColor}; ${city.alertTier === 'Red'
+            ? 'animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;'
+            : ''
+          }"></span>
             <span class="font-mono text-xs font-semibold text-white">${city.name}</span>
             <span class="font-mono text-[11px] text-[#a3a3a3]">${city.temp}°</span>
-            <span class="material-symbols-outlined text-[13px] ${
-              isSelected ? 'text-white' : 'text-[#8e9192]'
-            }">${city.icon}</span>
+            <span class="material-symbols-outlined text-[13px] ${isSelected ? 'text-white' : 'text-[#8e9192]'
+          }">${city.icon}</span>
           </div>
-          <div class="w-2 h-2 rounded-full mx-auto mt-0.5 ${
-            isSelected ? 'bg-white ring-2 ring-white/50' : 'bg-[#e5e2e1] ring-1 ring-black/40'
+          <div class="w-2 h-2 rounded-full mx-auto mt-0.5 ${isSelected ? 'bg-white ring-2 ring-white/50' : 'bg-[#e5e2e1] ring-1 ring-black/40'
           }"></div>
         `;
       }
@@ -562,7 +603,12 @@ export default function MapComponent({
         }
       });
 
-      const marker = new maplibregl.Marker({ element: el, anchor: landingMode ? 'center' : 'bottom' })
+      const cityPos = CITY_POSITIONS[city.id] || { anchor: 'bottom', offset: [0, -4] };
+      const marker = new maplibregl.Marker({
+        element: el,
+        anchor: landingMode ? 'center' : cityPos.anchor,
+        offset: landingMode ? [0, 0] : cityPos.offset,
+      })
         .setLngLat([city.lon, city.lat])
         .addTo(map);
 
@@ -619,7 +665,7 @@ export default function MapComponent({
     );
   }
 
-  // --- RENDER VARIANT: DASHBOARD WORKSTATION ---
+  // ---  VARIANT: DASHBOARD WORKSTATION ---
   return (
     <div className="relative w-full h-full min-h-[500px] overflow-hidden rounded-2xl bg-[#0e0e0e] border border-[#262626]/70 shadow-2xl flex flex-col">
       {/* MapLibre GL DOM Container */}
@@ -667,11 +713,10 @@ export default function MapComponent({
             key={b.id}
             onClick={() => handleBasemapSelect(b.id)}
             title={b.description}
-            className={`flex items-center space-x-1.5 px-3 py-1 rounded-full font-sans text-[11px] transition-all cursor-pointer ${
-              currentBasemap === b.id
-                ? 'bg-white text-[#0a0a0a] font-semibold shadow-sm'
-                : 'text-[#a3a3a3] hover:text-white hover:bg-[#201f1f] font-normal'
-            }`}
+            className={`flex items-center space-x-1.5 px-3 py-1 rounded-full font-sans text-[11px] transition-all cursor-pointer ${currentBasemap === b.id
+              ? 'bg-white text-[#0a0a0a] font-semibold shadow-sm'
+              : 'text-[#a3a3a3] hover:text-white hover:bg-[#201f1f] font-normal'
+              }`}
           >
             <span className="material-symbols-outlined text-[14px]">{b.icon}</span>
             <span>{b.label}</span>
@@ -694,11 +739,10 @@ export default function MapComponent({
               setCurrentOverlay(ov.id);
               if (onLayerChange) onLayerChange(ov.id);
             }}
-            className={`flex items-center space-x-1 px-2.5 py-1 rounded-full font-sans text-[11px] transition-all cursor-pointer ${
-              currentOverlay === ov.id
-                ? 'bg-white text-[#0a0a0a] font-semibold shadow-sm'
-                : 'text-[#a3a3a3] hover:text-white hover:bg-[#201f1f] font-normal'
-            }`}
+            className={`flex items-center space-x-1 px-2.5 py-1 rounded-full font-sans text-[11px] transition-all cursor-pointer ${currentOverlay === ov.id
+              ? 'bg-white text-[#0a0a0a] font-semibold shadow-sm'
+              : 'text-[#a3a3a3] hover:text-white hover:bg-[#201f1f] font-normal'
+              }`}
           >
             <span className="material-symbols-outlined text-[13px]">{ov.icon}</span>
             <span>{ov.label}</span>
@@ -743,7 +787,7 @@ export default function MapComponent({
  * Updates visibility and properties for atmospheric heatmap layers
  */
 function applyMeteorologicalLayer(map, layerType) {
-  if (!map || !map.isStyleLoaded()) return;
+  if (!map || !map.getStyle()) return;
 
   const thermalLayer = map.getLayer('thermal-heatmap');
   const precipLayer = map.getLayer('precipitation-heatmap');
@@ -761,6 +805,10 @@ function applyMeteorologicalLayer(map, layerType) {
   }
   if (pointsLayer) {
     map.setLayoutProperty('atmospheric-points', 'visibility', layerType !== 'default' ? 'visible' : 'none');
+    if (layerType !== 'default') {
+      const dotColor = layerType === 'rainfall' ? '#38bdf8' : layerType === 'heatmap' ? '#f97316' : '#4edea3';
+      map.setPaintProperty('atmospheric-points', 'circle-color', dotColor);
+    }
   }
 
   // Base boundary fill opacity
@@ -768,7 +816,7 @@ function applyMeteorologicalLayer(map, layerType) {
     map.setPaintProperty(
       'india-land-fill',
       'fill-opacity',
-      layerType === 'default' ? 0.02 : 0.08
+      layerType === 'default' ? 0.02 : 0.06
     );
   }
 }

@@ -322,9 +322,7 @@ export default function LandingPage() {
         <footer className="pt-12 pb-20 max-w-7xl mx-auto border-t border-[#262626]/40">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-10">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#222222] border border-[#262626] flex items-center justify-center text-white">
-                <span className="material-symbols-outlined text-sm font-bold">hub</span>
-              </div>
+              <img src="/weather.png" alt="ClimaFuse Icon" className="w-8 h-8 object-contain rounded-full shadow-sm ring-1 ring-white/10" />
               <div>
                 <div className="font-['Plus_Jakarta_Sans',sans-serif] text-lg font-bold text-white tracking-tight">
                   ClimaFuse

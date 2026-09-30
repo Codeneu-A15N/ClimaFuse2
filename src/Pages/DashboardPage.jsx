@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import DashboardNavDock from '../components/DashboardNavDock';
 import DashboardTopBar from '../components/DashboardTopBar';
 import MapComponent from '../components/MapComponent';
@@ -10,9 +11,19 @@ import { CITIES } from '../api/cities';
 import { WEIGHT_REGIMES } from '../api/modelWeightsData';
 
 export default function DashboardPage() {
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
   const [selectedCity, setSelectedCity] = useState(null);
   const [activeOverlay, setActiveOverlay] = useState('temperature');
-  const [activeTab, setActiveTab] = useState('map');
+  const [activeTab, setActiveTab] = useState(
+    tabParam && ['map', 'alerts', 'comparison'].includes(tabParam) ? tabParam : 'map'
+  );
+
+  useEffect(() => {
+    if (tabParam && ['map', 'alerts', 'comparison'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
   const [modelWeightRegime, setModelWeightRegime] = useState('thermal');
   const [modelFocus, setModelFocus] = useState('blend');
   const [selectedRegion, setSelectedRegion] = useState('maharashtra');

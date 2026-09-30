@@ -56,6 +56,9 @@ Climafuse/
 - **Subcomponents**: Extract modular sections into `src/components/` (e.g., [`SideNavDock.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/SideNavDock.jsx), [`TopUtilityPill.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/TopUtilityPill.jsx), [`MapComponent.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/MapComponent.jsx), [`BentoGrid.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/BentoGrid.jsx)).
 - **Geospatial Map Architecture**:
   - `MapComponent.jsx` handles MapLibre GL rendering with multi-basemap capabilities.
+  - **MapLibre GL v6 Worker Resolution**: MapLibre v6 uses ES modules with Web Workers. In Vite, always import the worker using `import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'` and invoke `setWorkerUrl(workerUrl)` at entrypoints ([`src/main.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/main.jsx), [`MapComponent.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/MapComponent.jsx), [`ModelWeightMap.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/ModelWeightMap.jsx)). This prevents the fatal "Worker failed to load / strict MIME type text/html" error on deep routes in deployment.
+  - **In-Memory National Boundary**: Use in-memory [`src/api/indiaBoundary.js`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/api/indiaBoundary.js) (`INDIA_GEOJSON`) for GeoJSON sources rather than relative fetch strings (`/india.geojson`) to prevent asynchronous 404s or network race conditions during tile processing.
+  - **Style Load Lifecycle Guard**: Never invoke `map.setStyle()` on initial component mount when `new maplibregl.Map({ style: initialStyle })` has just started loading (guard with `isInitialBasemapMount.current`). Always check `map.isStyleLoaded()` before attaching vector or heatmap layers.
   - **Zero-Key Physical Relief Default**: Always defaults to open ESRI World Physical Map tiles (`https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}`) for hypsometric terrain, mountain relief, and hydrological networks with ZERO required API keys.
   - **Optional Custom Tiles**: Supports `VITE_MAPTILER_KEY` if provided in `.env`.
   - **Landing Page Sizing Constraint**: When rendered on `LandingPage.jsx` (`variant="landing"`), the container must strictly preserve `w-full aspect-[4/5] max-w-md mx-auto rounded-2xl` with zero dimension shift.
@@ -77,6 +80,22 @@ Climafuse/
     4. **Dominant Attribution & Terrain Physics Rationale**: Scientific mechanism and dominant weight scale bar.
     5. **Inspectable Full Matrix Modal**: Popover drawer to view the complete 12-region attribution matrix and lead-time CRPS benchmarks.
   - Supports 3 weight regimes: **Thermal Weights**, **Precipitation Weights**, and **Heat Index Weights**, combined with 3 basemaps (Physical Relief, Topographic, Satellite) and 4 model focus modes (Consensus Blend, ECMWF IFS, ECMWF AIFS, NCMRWF).
+- **Full Station Analysis & Radiosonde Architecture**:
+  - Located at `/station/:cityId` (e.g. `/station/delhi`, `/station/mumbai`) and handled by [`src/Pages/StationAnalysisPage.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/Pages/StationAnalysisPage.jsx).
+  - Linked directly from the bottom CTA button in [`StationTelemetryPanel.jsx`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/components/StationTelemetryPanel.jsx) (`View Full Station Analytics & Radiosonde`).
+  - Supports all 10 IMD reference stations with dynamic data loaded via [`src/api/stationAnalysisData.js`](file:///c:/Users/neera/OneDrive/Desktop/ClimaFuse/Climafuse/src/api/stationAnalysisData.js).
+  - Includes:
+    1. **Top Bar & City Dropdown**: Quick-switch dropdown menu to jump between any of the 10 stations without returning to the map.
+    2. **Station Summary Banner**: WMO ID, coordinates, elevation ASL, BMA blend, current condition preview, and timeseries horizon switcher.
+    3. **5-Parameter Grid**: Surface air temp, apparent heat index, accumulated rain, wind vector, and relative humidity.
+    4. **3 High-Fidelity SVG Charts**:
+       - 2m Temperature with 90% BMA confidence interval polygon, NWP IFS, AI AIFS, ClimaFuse BMA, and IMD Observed nodes with interactive cursor crosshairs and tooltips.
+       - Heat Index & Biometeorological Stress curve with 35.0°C danger zone shading and threshold lines.
+       - Hourly Precipitation & Hyetograph paired bar comparison.
+    5. **Radiosonde Sounding Profile**: Vertical isobaric levels (1000 hPa to 200 hPa), freezing level, CAPE, and Lifted Index.
+    6. **Synoptic Reasoning & Scorecard**: BMA two-tone proportion bar, meteorologist diagnostic commentary, convergence metrics, IMD advisory card, and accuracy scorecard table.
+    7. **CSV Telemetry Export**: Single-click CSV download generation.
+    8. **Austere Floating Nav Dock with High-Contrast White Boundary**: Framed by a solid 2px white boundary (`border-2 border-white shadow-2xl shadow-black/80`) across all workstations to ensure crisp visual containment and separation against dark canvas backdrops (`#0A0A0A`). Retains strictly non-redundant controls: the top white 'CF' brand anchor routes to the Live Map Dashboard, followed by Severe Alerts, Model Comparison, active Station Analysis, and Platform Overview (eliminating duplicate dashboard and download icons).
 - **Strict Austere Dark Mode Standard**: ClimaFuse is permanently locked to its austere technical dark aesthetic (`#0A0A0A`). Dark/light toggles and light-mode overrides have been eliminated across the landing page and dashboard workstation to preserve operational contrast.
 - **Smooth Anchors**: Maintain anchor navigation IDs: `#product`, `#how-it-works`, `#why-climafuse`, `#outputs`, `#coverage`.
 

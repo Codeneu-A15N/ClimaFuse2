@@ -290,8 +290,8 @@ export default function ModelWeightAnalysisPanel({
         </div>
 
         {/* Recharts Time-Series Curve */}
-        <div className="w-full h-[155px] pt-1">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="w-full h-[155px] pt-1" style={{ width: '100%', height: '155px', minHeight: '155px' }}>
+          <ResponsiveContainer width="100%" height="100%" minHeight={155}>
             <LineChart
               data={leadTimeSeries}
               margin={{ top: 8, right: 10, left: -22, bottom: 0 }}

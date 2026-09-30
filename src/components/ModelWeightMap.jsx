@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
+import { setWorkerUrl } from 'maplibre-gl';
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import {
   WEIGHT_REGIMES,
   LEAD_TIMES,
@@ -8,6 +10,10 @@ import {
   REGIONS_CATALOG,
 } from '../api/modelWeightsData';
 import { BASEMAPS } from './MapComponent';
+import { INDIA_GEOJSON } from '../api/indiaBoundary';
+
+// Ensure MapLibre worker is resolved in Vite builds
+setWorkerUrl(workerUrl);
 
 /**
  * ModelWeightMap
@@ -98,11 +104,11 @@ export default function ModelWeightMap({
   const attachWeightLayers = (map, basemapKey, regimeKey, modelKey, leadKey) => {
     if (!map || !map.isStyleLoaded()) return;
 
-    // 1. India GeoJSON boundary
+    // 1. India GeoJSON boundary from in-memory dataset
     if (!map.getSource('india-boundary')) {
       map.addSource('india-boundary', {
         type: 'geojson',
-        data: '/india.geojson',
+        data: INDIA_GEOJSON,
       });
     }
 
@@ -154,39 +160,39 @@ export default function ModelWeightMap({
             'interpolate',
             ['linear'],
             ['get', 'weight'],
-            15, 0.2,
-            35, 0.5,
-            55, 0.8,
+            15, 0.15,
+            35, 0.45,
+            55, 0.75,
             75, 1.0,
           ],
           'heatmap-intensity': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 1.8,
-            5, 2.8,
-            7, 4.0,
+            3, 0.85,
+            5, 1.25,
+            7, 1.8,
           ],
           'heatmap-color': [
             'interpolate',
             ['linear'],
             ['heatmap-density'],
             0, 'rgba(0, 0, 0, 0)',
-            0.2, 'rgba(56, 189, 248, 0.75)',  // Sky Blue (IFS dominant)
-            0.45, 'rgba(16, 185, 129, 0.82)', // Emerald (AIFS dominant)
-            0.7, 'rgba(251, 191, 36, 0.88)',  // Amber (High weight)
-            0.9, 'rgba(249, 115, 22, 0.92)',  // Orange (Very high)
-            1.0, 'rgba(239, 68, 68, 0.98)',   // Red / Dominant Peak
+            0.18, 'rgba(56, 189, 248, 0.55)', // Sky Blue (IFS dominant)
+            0.42, 'rgba(16, 185, 129, 0.72)', // Emerald (AIFS dominant)
+            0.68, 'rgba(251, 191, 36, 0.82)', // Amber (High weight)
+            0.88, 'rgba(249, 115, 22, 0.88)', // Orange (Very high)
+            1.0, 'rgba(239, 68, 68, 0.95)',   // Red / Dominant Peak
           ],
           'heatmap-radius': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            3, 70,
-            5, 130,
-            7, 200,
+            3, 48,
+            5, 85,
+            7, 145,
           ],
-          'heatmap-opacity': 0.82,
+          'heatmap-opacity': 0.72,
         },
       });
     }
@@ -287,8 +293,14 @@ export default function ModelWeightMap({
     };
   }, []);
 
-  // Update style when basemap changes
+  const isInitialBasemapMount = useRef(true);
+
+  // Update style when basemap changes (skipping initial mount)
   useEffect(() => {
+    if (isInitialBasemapMount.current) {
+      isInitialBasemapMount.current = false;
+      return;
+    }
     const map = mapRef.current;
     if (!map) return;
 
@@ -304,16 +316,22 @@ export default function ModelWeightMap({
   // Update dataset when regime, model, lead time, or region selection changes
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map) return;
 
-    const source = map.getSource('model-weights-source');
-    if (source) {
-      source.setData(getModelWeightsGeoJSON(currentRegime, currentModel, currentLeadTime));
+    if (map.isStyleLoaded()) {
+      const source = map.getSource('model-weights-source');
+      if (source) {
+        source.setData(getModelWeightsGeoJSON(currentRegime, currentModel, currentLeadTime));
+      } else {
+        attachWeightLayers(map, currentBasemap, currentRegime, currentModel, currentLeadTime);
+      }
+      renderDOMMarkers(map, currentRegime, currentModel, currentLeadTime, selectedRegion);
     } else {
-      attachWeightLayers(map, currentBasemap, currentRegime, currentModel, currentLeadTime);
+      map.once('load', () => {
+        attachWeightLayers(map, currentBasemap, currentRegime, currentModel, currentLeadTime);
+        renderDOMMarkers(map, currentRegime, currentModel, currentLeadTime, selectedRegion);
+      });
     }
-
-    renderDOMMarkers(map, currentRegime, currentModel, currentLeadTime, selectedRegion);
   }, [currentRegime, currentModel, currentLeadTime, selectedRegion]);
 
   // Render clickable DOM station markers with microclimatic badges

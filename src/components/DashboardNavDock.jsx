@@ -4,11 +4,25 @@ import { Link } from 'react-router-dom';
 export default function DashboardNavDock({ activeTab = 'map', setActiveTab }) {
   return (
     <aside
-      className="fixed left-4 top-1/2 -translate-y-1/2 z-40 bg-[#121212]/95 backdrop-blur-md border border-[#262626] rounded-2xl py-3 px-2 flex flex-col items-center justify-center gap-3 shadow-xl shadow-black/40"
+      className="fixed left-4 top-1/2 -translate-y-1/2 z-40 bg-[#121212]/95 backdrop-blur-md border-2 border-white rounded-2xl py-3 px-2 flex flex-col items-center justify-center gap-3 shadow-2xl shadow-black/80"
       style={{ top: '48%' }}
       aria-label="Dashboard Dock Navigation"
     >
       <nav aria-label="Main Navigation" className="flex flex-col items-center space-y-2">
+        {/* Brand Icon */}
+        <Link
+          to="/"
+          className="group relative flex items-center justify-center w-10 h-10 rounded-xl hover:bg-[#1c1b1b] transition-colors"
+          title="ClimaFuse Home"
+        >
+          <img src="/weather.png" alt="ClimaFuse" className="w-6 h-6 object-contain rounded-full shadow-sm ring-1 ring-white/10" />
+          <span className="absolute left-14 px-2.5 py-1 rounded-lg bg-[#353534] text-white font-mono text-[0.6875rem] tracking-wide whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity border border-[#444748] shadow-lg z-50">
+            ClimaFuse Home
+          </span>
+        </Link>
+
+        <div className="w-6 h-px bg-white/20 mb-1" />
+
         {/* Tab 1: Dashboard / Map (ACTIVE) */}
         <button
           onClick={() => setActiveTab && setActiveTab('map')}
@@ -57,7 +71,25 @@ export default function DashboardNavDock({ activeTab = 'map', setActiveTab }) {
           </span>
         </button>
 
-        {/* Tab 4: About / Return to Landing Page */}
+        {/* Tab 4: Station Analysis & Radiosonde */}
+        <Link
+          to="/station/delhi"
+          className={`group relative flex items-center justify-center w-10 h-10 rounded-xl transition-colors ${
+            activeTab === 'station'
+              ? 'bg-[#2a2a2a] text-white border border-[#353534]'
+              : 'text-[#a3a3a3] hover:text-white hover:bg-[#1c1b1b]'
+          }`}
+          title="Full Station Analysis & Radiosonde"
+        >
+          <span className="material-symbols-outlined text-[20px]">travel_explore</span>
+          <span className="absolute left-14 px-2.5 py-1 rounded-lg bg-[#353534] text-white font-mono text-[0.6875rem] tracking-wide whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity border border-[#444748] shadow-lg z-50">
+            Station Analysis
+          </span>
+        </Link>
+
+        <div className="w-6 h-px bg-white/20 my-1" />
+
+        {/* Tab 5: About / Return to Landing Page */}
         <Link
           to="/"
           className="group relative flex items-center justify-center w-10 h-10 rounded-xl text-[#a3a3a3] hover:text-white hover:bg-[#1c1b1b] transition-colors"
